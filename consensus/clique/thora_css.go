@@ -11,7 +11,7 @@ import (
 )
 
 // BlockReward is the reward in wei distributed each block.
-var BlockReward = new(big.Int).Mul(big.NewInt(100), big.NewInt(params.GWei))
+var BlockReward = new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether))
 
 func (c *Clique) IsCurrentValidator(etherbase common.Address, chain consensus.ChainHeaderReader) (bool, error) {
 	currentHeader := chain.CurrentHeader()
