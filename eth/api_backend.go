@@ -409,6 +409,10 @@ func (b *EthAPIBackend) Miner() *miner.Miner {
 	return b.eth.Miner()
 }
 
+func (b *EthAPIBackend) ValidateBeforeMining() (bool, error) {
+	return b.eth.ValidateBeforeMining()
+}
+
 func (b *EthAPIBackend) StartMining() error {
 	return b.eth.StartMining()
 }

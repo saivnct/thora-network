@@ -396,6 +396,28 @@ func (s *Ethereum) SetEtherbase(etherbase common.Address) {
 	s.miner.SetEtherbase(etherbase)
 }
 
+func (s *Ethereum) ValidateBeforeMining() (bool, error) {
+	eb, err := s.Etherbase()
+	if err != nil {
+		return false, err
+	}
+
+	var cli *clique.Clique
+	if c, ok := s.engine.(*clique.Clique); ok {
+		cli = c
+	} else if cl, ok := s.engine.(*beacon.Beacon); ok {
+		if c, ok := cl.InnerEngine().(*clique.Clique); ok {
+			cli = c
+		}
+	}
+
+	if cli != nil {
+		return cli.IsCurrentValidator(eb, s.blockchain)
+	}
+
+	return true, nil
+}
+
 // StartMining starts the miner with the given number of CPU threads. If mining
 // is already running, this method adjust the number of threads allowed to use
 // and updates the minimum price required by the transaction pool.

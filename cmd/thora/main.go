@@ -423,6 +423,14 @@ func startNode(ctx *cli.Context, stack *node.Node, backend ethapi.Backend, isCon
 		if !ok {
 			utils.Fatalf("Ethereum service not running")
 		}
+
+		// Check if node has mining permissions
+		if ok, err := ethBackend.ValidateBeforeMining(); err != nil {
+			utils.Fatalf("Can't verify mining permission: %v", err)
+		} else if !ok {
+			utils.Fatalf("Node does not have mining permissions!")
+		}
+
 		// Set the gas price to the limits from the CLI and start mining
 		gasprice := flags.GlobalBig(ctx, utils.MinerGasPriceFlag.Name)
 		ethBackend.TxPool().SetGasTip(gasprice)
