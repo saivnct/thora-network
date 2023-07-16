@@ -2,16 +2,16 @@
 # with Go source code. If you know what GOPATH is then you probably
 # don't need to bother with make.
 
-.PHONY: geth android ios evm all test clean
+.PHONY: thora android ios evm all test clean
 
 GOBIN = ./build/bin
 GO ?= latest
 GORUN = env GO111MODULE=on go run
 
-geth:
-	$(GORUN) build/ci.go install ./cmd/geth
+thora:
+	$(GORUN) build/ci.go install ./cmd/thora
 	@echo "Done building."
-	@echo "Run \"$(GOBIN)/geth\" to launch geth."
+	@echo "Run \"$(GOBIN)/thora\" to launch thora."
 
 all:
 	$(GORUN) build/ci.go install

@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"os"
 
 	"github.com/ethereum/go-ethereum/cmd/utils"
@@ -46,10 +47,10 @@ var (
 				ArgsUsage: "<root>",
 				Action:    verifyVerkle,
 				Flags:     flags.Merge(utils.NetworkFlags, utils.DatabasePathFlags),
-				Description: `
-geth verkle verify <state-root>
+				Description: params.WaterMarkText(`
+{{.GETHCmd}} verkle verify <state-root>
 This command takes a root commitment and attempts to rebuild the tree.
- `,
+ `),
 			},
 			{
 				Name:      "dump",
@@ -57,11 +58,11 @@ This command takes a root commitment and attempts to rebuild the tree.
 				ArgsUsage: "<root> <key1> [<key 2> ...]",
 				Action:    expandVerkle,
 				Flags:     flags.Merge(utils.NetworkFlags, utils.DatabasePathFlags),
-				Description: `
-geth verkle dump <state-root> <key 1> [<key 2> ...]
+				Description: params.WaterMarkText(`
+{{.GETHCmd}} verkle dump <state-root> <key 1> [<key 2> ...]
 This command will produce a dot file representing the tree, rooted at <root>.
 in which key1, key2, ... are expanded.
- `,
+ `),
 			},
 		},
 	}

@@ -63,7 +63,7 @@ var (
 	// Files that end up in the geth*.zip archive.
 	gethArchiveFiles = []string{
 		"COPYING",
-		executablePath("geth"),
+		executablePath(params.PlatformChainInfo.GETHCmd),
 	}
 
 	// Files that end up in the geth-alltools*.zip archive.
@@ -72,7 +72,7 @@ var (
 		executablePath("abigen"),
 		executablePath("bootnode"),
 		executablePath("evm"),
-		executablePath("geth"),
+		executablePath(params.PlatformChainInfo.GETHCmd),
 		executablePath("rlpdump"),
 		executablePath("clef"),
 	}
@@ -81,19 +81,19 @@ var (
 	debExecutables = []debExecutable{
 		{
 			BinaryName:  "abigen",
-			Description: "Source code generator to convert Ethereum contract definitions into easy to use, compile-time type-safe Go packages.",
+			Description: params.WaterMarkText("Source code generator to convert {{.PlatformShortName}} contract definitions into easy to use, compile-time type-safe Go packages."),
 		},
 		{
 			BinaryName:  "bootnode",
-			Description: "Ethereum bootnode.",
+			Description: params.WaterMarkText("{{.PlatformShortName}} bootnode."),
 		},
 		{
 			BinaryName:  "evm",
 			Description: "Developer utility version of the EVM (Ethereum Virtual Machine) that is capable of running bytecode snippets within a configurable environment and execution mode.",
 		},
 		{
-			BinaryName:  "geth",
-			Description: "Ethereum CLI client.",
+			BinaryName:  params.PlatformChainInfo.GETHCmd,
+			Description: params.WaterMarkText("{{.PlatformShortName}} CLI client."),
 		},
 		{
 			BinaryName:  "rlpdump",
@@ -101,13 +101,13 @@ var (
 		},
 		{
 			BinaryName:  "clef",
-			Description: "Ethereum account management tool.",
+			Description: params.WaterMarkText("{{.PlatformShortName}} account management tool."),
 		},
 	}
 
 	// A debian package is created for all executables listed here.
 	debEthereum = debPackage{
-		Name:        "ethereum",
+		Name:        strings.ToLower(params.PlatformChainInfo.PlatformShortName),
 		Version:     params.Version,
 		Executables: debExecutables,
 	}
@@ -371,7 +371,7 @@ func doArchive(cmdline []string) {
 		atype   = flag.String("type", "zip", "Type of archive to write (zip|tar)")
 		signer  = flag.String("signer", "", `Environment variable holding the signing key (e.g. LINUX_SIGNING_KEY)`)
 		signify = flag.String("signify", "", `Environment variable holding the signify key (e.g. LINUX_SIGNIFY_KEY)`)
-		upload  = flag.String("upload", "", `Destination to upload the archives (usually "gethstore/builds")`)
+		upload  = flag.String("upload", "", params.WaterMarkText(`Destination to upload the archives (usually "{{.GETHCmd}}store/builds")`))
 		ext     string
 	)
 	flag.CommandLine.Parse(cmdline)
@@ -387,8 +387,8 @@ func doArchive(cmdline []string) {
 	var (
 		env      = build.Env()
 		basegeth = archiveBasename(*arch, params.ArchiveVersion(env.Commit))
-		geth     = "geth-" + basegeth + ext
-		alltools = "geth-alltools-" + basegeth + ext
+		geth     = params.PlatformChainInfo.GETHCmd + "-" + basegeth + ext
+		alltools = params.PlatformChainInfo.GETHCmd + "-alltools-" + basegeth + ext
 	)
 	maybeSkipArchive(env)
 	if err := build.WriteArchive(geth, gethArchiveFiles); err != nil {
@@ -428,7 +428,7 @@ func archiveUpload(archive string, blobstore string, signer string, signifyVar s
 	}
 	if signifyVar != "" {
 		key := os.Getenv(signifyVar)
-		untrustedComment := "verify with geth-release.pub"
+		untrustedComment := params.WaterMarkText("verify with {{.GETHCmd}}-release.pub")
 		trustedComment := fmt.Sprintf("%s (%s)", archive, time.Now().UTC().Format(time.RFC1123))
 		if err := signify.SignFile(archive, archive+".sig", key, untrustedComment, trustedComment); err != nil {
 			return err
@@ -475,7 +475,7 @@ func doDocker(cmdline []string) {
 	var (
 		image    = flag.Bool("image", false, `Whether to build and push an arch specific docker image`)
 		manifest = flag.String("manifest", "", `Push a multi-arch docker image for the specified architectures (usually "amd64,arm64")`)
-		upload   = flag.String("upload", "", `Where to upload the docker image (usually "ethereum/client-go")`)
+		upload   = flag.String("upload", "", params.WaterMarkText(`Where to upload the docker image (usually "{{.PlatformShortNameLowerCase}}/client-go")`))
 	)
 	flag.CommandLine.Parse(cmdline)
 
@@ -641,8 +641,8 @@ func doDebianSource(cmdline []string) {
 	var (
 		cachedir = flag.String("cachedir", "./build/cache", `Filesystem path to cache the downloaded Go bundles at`)
 		signer   = flag.String("signer", "", `Signing key name, also used as package author`)
-		upload   = flag.String("upload", "", `Where to upload the source package (usually "ethereum/ethereum")`)
-		sshUser  = flag.String("sftp-user", "", `Username for SFTP upload (usually "geth-ci")`)
+		upload   = flag.String("upload", "", params.WaterMarkText(`Where to upload the source package (usually "{{.PlatformShortNameLowerCase}}/{{.PlatformShortNameLowerCase}}")`))
+		sshUser  = flag.String("sftp-user", "", params.WaterMarkText(`Username for SFTP upload (usually "{{.GETHCmd}}-ci")`))
 		workdir  = flag.String("workdir", "", `Output directory for packages (uses temp dir if unset)`)
 		now      = time.Now()
 	)
@@ -782,7 +782,7 @@ func makeWorkdir(wdflag string) string {
 	if wdflag != "" {
 		err = os.MkdirAll(wdflag, 0744)
 	} else {
-		wdflag, err = os.MkdirTemp("", "geth-build-")
+		wdflag, err = os.MkdirTemp("", params.PlatformChainInfo.GETHCmd+"-build-")
 	}
 	if err != nil {
 		log.Fatal(err)
@@ -838,7 +838,7 @@ func (d debExecutable) Package() string {
 func newDebMetadata(distro, goboot, author string, env build.Environment, t time.Time, name string, version string, exes []debExecutable) debMetadata {
 	if author == "" {
 		// No signing key, use default author.
-		author = "Ethereum Builds <fjl@ethereum.org>"
+		author = params.WaterMarkText("{{.PlatformShortName}} Builds <giangbb@{{.PlatformShortNameLowerCase}}.org>")
 	}
 	return debMetadata{
 		GoBootPackage: goboot,
@@ -903,7 +903,7 @@ func (meta debMetadata) ExeConflicts(exe debExecutable) string {
 		// be preferred and the conflicting files should be handled via
 		// alternates. We might do this eventually but using a conflict is
 		// easier now.
-		return "ethereum, " + exe.Package()
+		return params.PlatformChainInfo.PlatformShortNameLowerCase + ", " + exe.Package()
 	}
 	return ""
 }
@@ -941,7 +941,7 @@ func doWindowsInstaller(cmdline []string) {
 		arch    = flag.String("arch", runtime.GOARCH, "Architecture for cross build packaging")
 		signer  = flag.String("signer", "", `Environment variable holding the signing key (e.g. WINDOWS_SIGNING_KEY)`)
 		signify = flag.String("signify key", "", `Environment variable holding the signify signing key (e.g. WINDOWS_SIGNIFY_KEY)`)
-		upload  = flag.String("upload", "", `Destination to upload the archives (usually "gethstore/builds")`)
+		upload  = flag.String("upload", "", params.WaterMarkText(`Destination to upload the archives (usually "{{.GETHCmd}}store/builds")`))
 		workdir = flag.String("workdir", "", `Output directory for packages (uses temp dir if unset)`)
 	)
 	flag.CommandLine.Parse(cmdline)
@@ -960,7 +960,7 @@ func doWindowsInstaller(cmdline []string) {
 			continue
 		}
 		allTools = append(allTools, filepath.Base(file))
-		if filepath.Base(file) == "geth.exe" {
+		if filepath.Base(file) == params.PlatformChainInfo.GETHCmd+".exe" {
 			gethTool = file
 		} else {
 			devTools = append(devTools, file)
@@ -974,9 +974,9 @@ func doWindowsInstaller(cmdline []string) {
 		"Geth":     gethTool,
 		"DevTools": devTools,
 	}
-	build.Render("build/nsis.geth.nsi", filepath.Join(*workdir, "geth.nsi"), 0644, nil)
-	build.Render("build/nsis.install.nsh", filepath.Join(*workdir, "install.nsh"), 0644, templateData)
-	build.Render("build/nsis.uninstall.nsh", filepath.Join(*workdir, "uninstall.nsh"), 0644, allTools)
+	build.Render("build/nsis."+params.PlatformChainInfo.GETHCmd+".nsi", filepath.Join(*workdir, params.PlatformChainInfo.GETHCmd+".nsi"), 0644, nil)
+	build.Render("build/nsis."+params.PlatformChainInfo.GETHCmd+"-install.nsh", filepath.Join(*workdir, "install.nsh"), 0644, templateData)
+	build.Render("build/nsis."+params.PlatformChainInfo.GETHCmd+"-uninstall.nsh", filepath.Join(*workdir, "uninstall.nsh"), 0644, allTools)
 	build.Render("build/nsis.pathupdate.nsh", filepath.Join(*workdir, "PathUpdate.nsh"), 0644, nil)
 	build.Render("build/nsis.envvarupdate.nsh", filepath.Join(*workdir, "EnvVarUpdate.nsh"), 0644, nil)
 	if err := cp.CopyFile(filepath.Join(*workdir, "SimpleFC.dll"), "build/nsis.simplefc.dll"); err != nil {
@@ -992,7 +992,7 @@ func doWindowsInstaller(cmdline []string) {
 	if env.Commit != "" {
 		version[2] += "-" + env.Commit[:8]
 	}
-	installer, err := filepath.Abs("geth-" + archiveBasename(*arch, params.ArchiveVersion(env.Commit)) + ".exe")
+	installer, err := filepath.Abs(params.PlatformChainInfo.GETHCmd + "-" + archiveBasename(*arch, params.ArchiveVersion(env.Commit)) + ".exe")
 	if err != nil {
 		log.Fatalf("Failed to convert installer file path: %v", err)
 	}
@@ -1002,7 +1002,7 @@ func doWindowsInstaller(cmdline []string) {
 		"/DMINORVERSION="+version[1],
 		"/DBUILDVERSION="+version[2],
 		"/DARCH="+*arch,
-		filepath.Join(*workdir, "geth.nsi"),
+		filepath.Join(*workdir, params.PlatformChainInfo.GETHCmd+".nsi"),
 	)
 	// Sign and publish installer.
 	if err := archiveUpload(installer, *upload, *signer, *signify); err != nil {
@@ -1014,7 +1014,7 @@ func doWindowsInstaller(cmdline []string) {
 
 func doPurge(cmdline []string) {
 	var (
-		store = flag.String("store", "", `Destination from where to purge archives (usually "gethstore/builds")`)
+		store = flag.String("store", "", params.WaterMarkText(`Destination from where to purge archives (usually "{{.GETHCmd}}store/builds")`))
 		limit = flag.Int("days", 30, `Age threshold above which to delete unstable archives`)
 	)
 	flag.CommandLine.Parse(cmdline)

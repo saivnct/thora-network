@@ -19,6 +19,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"os"
 	"sort"
 	"strconv"
@@ -51,7 +52,7 @@ import (
 )
 
 const (
-	clientIdentifier = "geth" // Client identifier to advertise over the network
+	clientIdentifier = "thora" // Client identifier to advertise over the network
 )
 
 var (
@@ -196,12 +197,12 @@ var (
 	}
 )
 
-var app = flags.NewApp("the go-ethereum command line interface")
+var app = flags.NewApp(params.WaterMarkText("the {{.PlatformName}} command line interface"))
 
 func init() {
 	// Initialize the CLI app and start Geth
 	app.Action = geth
-	app.Copyright = "Copyright 2013-2023 The go-ethereum Authors"
+	app.Copyright = params.WaterMarkText("Copyright (c) 2019 The {{.PlatformName}} Authors")
 	app.Commands = []*cli.Command{
 		// See chaincmd.go:
 		initCommand,

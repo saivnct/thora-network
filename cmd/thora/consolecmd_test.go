@@ -64,12 +64,14 @@ func TestConsoleWelcome(t *testing.T) {
 		return time.Unix(1548854791, 0).Format("Mon Jan 02 2006 15:04:05 GMT-0700 (MST)")
 	})
 	geth.SetTemplateFunc("apis", func() string { return ipcAPIs })
+	geth.SetTemplateFunc("platformchainName", func() string { return params.PlatformChainInfo.PlatformName })
+	geth.SetTemplateFunc("getCmd", func() string { return params.PlatformChainInfo.GETHCmd })
 
 	// Verify the actual welcome message to the required template
 	geth.Expect(`
-Welcome to the Geth JavaScript console!
+Welcome to the {{platformchainName}} JavaScript console!
 
-instance: Geth/v{{gethver}}/{{goos}}-{{goarch}}/{{gover}}
+instance: {{getCmd}}/v{{gethver}}/{{goos}}-{{goarch}}/{{gover}}
 coinbase: {{.Etherbase}}
 at block: 0 ({{niltime}})
  datadir: {{.Datadir}}
@@ -92,7 +94,7 @@ func TestAttachWelcome(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		ipc = `\\.\pipe\geth` + strconv.Itoa(trulyRandInt(100000, 999999))
 	} else {
-		ipc = filepath.Join(t.TempDir(), "geth.ipc")
+		ipc = filepath.Join(t.TempDir(), params.PlatformChainInfo.IPCPath)
 	}
 	// And HTTP + WS attachment
 	p := trulyRandInt(1024, 65533) // Yeah, sometimes this will fail, sorry :P
@@ -137,12 +139,14 @@ func testAttachWelcome(t *testing.T, geth *testgeth, endpoint, apis string) {
 	attach.SetTemplateFunc("ipc", func() bool { return strings.HasPrefix(endpoint, "ipc") })
 	attach.SetTemplateFunc("datadir", func() string { return geth.Datadir })
 	attach.SetTemplateFunc("apis", func() string { return apis })
+	attach.SetTemplateFunc("platformchainName", func() string { return params.PlatformChainInfo.PlatformName })
+	attach.SetTemplateFunc("getCmd", func() string { return params.PlatformChainInfo.GETHCmd })
 
 	// Verify the actual welcome message to the required template
 	attach.Expect(`
-Welcome to the Geth JavaScript console!
+Welcome to the {{platformchainName}} JavaScript console!
 
-instance: Geth/v{{gethver}}/{{goos}}-{{goarch}}/{{gover}}
+instance: {{getCmd}}/v{{gethver}}/{{goos}}-{{goarch}}/{{gover}}
 coinbase: {{etherbase}}
 at block: 0 ({{niltime}}){{if ipc}}
  datadir: {{datadir}}{{end}}

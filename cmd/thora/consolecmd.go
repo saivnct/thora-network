@@ -18,6 +18,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/cmd/utils"
@@ -34,10 +35,10 @@ var (
 		Name:   "console",
 		Usage:  "Start an interactive JavaScript environment",
 		Flags:  flags.Merge(nodeFlags, rpcFlags, consoleFlags),
-		Description: `
-The Geth console is an interactive shell for the JavaScript runtime environment
+		Description: params.WaterMarkText(`
+The {{.GETHCmd}} console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
-See https://geth.ethereum.org/docs/interacting-with-geth/javascript-console.`,
+See https://geth.ethereum.org/docs/interacting-with-geth/javascript-console.`),
 	}
 
 	attachCommand = &cli.Command{
@@ -46,11 +47,11 @@ See https://geth.ethereum.org/docs/interacting-with-geth/javascript-console.`,
 		Usage:     "Start an interactive JavaScript environment (connect to node)",
 		ArgsUsage: "[endpoint]",
 		Flags:     flags.Merge([]cli.Flag{utils.DataDirFlag, utils.HttpHeaderFlag}, consoleFlags),
-		Description: `
-The Geth console is an interactive shell for the JavaScript runtime environment
+		Description: params.WaterMarkText(`
+The {{.GETHCmd}} console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
 See https://geth.ethereum.org/docs/interacting-with-geth/javascript-console.
-This command allows to open a console on a running geth node.`,
+This command allows to open a console on a running {{.GETHCmd}} node.`),
 	}
 
 	javascriptCommand = &cli.Command{
@@ -121,7 +122,7 @@ func remoteConsole(ctx *cli.Context) error {
 	}
 	client, err := utils.DialRPCWithHeaders(endpoint, ctx.StringSlice(utils.HttpHeaderFlag.Name))
 	if err != nil {
-		utils.Fatalf("Unable to attach to remote geth: %v", err)
+		utils.Fatalf("Unable to attach to remote %s: %v", params.PlatformChainInfo.GETHCmd, err)
 	}
 	config := console.Config{
 		DataDir: utils.MakeDataDir(ctx),
@@ -155,6 +156,6 @@ func ephemeralConsole(ctx *cli.Context) error {
 		b.Write([]byte(fmt.Sprintf("loadScript('%s');", file)))
 	}
 	utils.Fatalf(`The "js" command is deprecated. Please use the following instead:
-geth --exec "%s" console`, b.String())
+%s --exec "%s" console`, params.PlatformChainInfo.GETHCmd, b.String())
 	return nil
 }

@@ -18,6 +18,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"os"
 
 	"github.com/ethereum/go-ethereum/accounts"
@@ -31,19 +32,19 @@ import (
 var (
 	walletCommand = &cli.Command{
 		Name:      "wallet",
-		Usage:     "Manage Ethereum presale wallets",
+		Usage:     params.WaterMarkText("Manage {{.PlatformShortName}} presale wallets"),
 		ArgsUsage: "",
-		Description: `
-    geth wallet import /path/to/my/presale.wallet
+		Description: params.WaterMarkText(`
+    {{.GETHCmd}} wallet import /path/to/my/presale.wallet
 
 will prompt for your password and imports your ether presale account.
 It can be used non-interactively with the --password option taking a
-passwordfile as argument containing the wallet password in plaintext.`,
+passwordfile as argument containing the wallet password in plaintext.`),
 		Subcommands: []*cli.Command{
 			{
 
 				Name:      "import",
-				Usage:     "Import Ethereum presale wallet",
+				Usage:     params.WaterMarkText("Import {{.PlatformShortName}} presale wallet"),
 				ArgsUsage: "<keyFile>",
 				Action:    importWallet,
 				Flags: []cli.Flag{
@@ -52,12 +53,12 @@ passwordfile as argument containing the wallet password in plaintext.`,
 					utils.PasswordFileFlag,
 					utils.LightKDFFlag,
 				},
-				Description: `
-	geth wallet [options] /path/to/my/presale.wallet
+				Description: params.WaterMarkText(`
+	{{.GETHCmd}} wallet [options] /path/to/my/presale.wallet
 
 will prompt for your password and imports your ether presale account.
 It can be used non-interactively with the --password option taking a
-passwordfile as argument containing the wallet password in plaintext.`,
+passwordfile as argument containing the wallet password in plaintext.`),
 			},
 		},
 	}
@@ -65,7 +66,7 @@ passwordfile as argument containing the wallet password in plaintext.`,
 	accountCommand = &cli.Command{
 		Name:  "account",
 		Usage: "Manage accounts",
-		Description: `
+		Description: params.WaterMarkText(`
 
 Manage accounts, list all existing accounts, import a private key into a new
 account, create a new account or update an existing account.
@@ -82,9 +83,9 @@ Note that exporting your key in unencrypted format is NOT supported.
 
 Keys are stored under <DATADIR>/keystore.
 It is safe to transfer the entire directory or the individual keys therein
-between ethereum nodes by simply copying.
+between {{.PlatformShortName}} nodes by simply copying.
 
-Make sure you backup your keys regularly.`,
+Make sure you backup your keys regularly.`),
 		Subcommands: []*cli.Command{
 			{
 				Name:   "list",
@@ -107,8 +108,8 @@ Print a short summary of all accounts`,
 					utils.PasswordFileFlag,
 					utils.LightKDFFlag,
 				},
-				Description: `
-    geth account new
+				Description: params.WaterMarkText(`
+    {{.GETHCmd}} account new
 
 Creates a new account and prints the address.
 
@@ -120,7 +121,7 @@ For non-interactive use the password can be specified with the --password flag:
 
 Note, this is meant to be used for testing only, it is a bad idea to save your
 password to file or expose in any other way.
-`,
+`),
 			},
 			{
 				Name:      "update",
@@ -132,8 +133,8 @@ password to file or expose in any other way.
 					utils.KeyStoreDirFlag,
 					utils.LightKDFFlag,
 				},
-				Description: `
-    geth account update <address>
+				Description: params.WaterMarkText(`
+    {{.GETHCmd}} account update <address>
 
 Update an existing account.
 
@@ -145,11 +146,11 @@ format to the newest format or change the password for an account.
 
 For non-interactive use the password can be specified with the --password flag:
 
-    geth account update [options] <address>
+    {{.GETHCmd}} account update [options] <address>
 
 Since only one password can be given, only format update can be performed,
 changing your password is only possible interactively.
-`,
+`),
 			},
 			{
 				Name:   "import",
@@ -162,8 +163,8 @@ changing your password is only possible interactively.
 					utils.LightKDFFlag,
 				},
 				ArgsUsage: "<keyFile>",
-				Description: `
-    geth account import <keyfile>
+				Description: params.WaterMarkText(`
+    {{.GETHCmd}} account import <keyfile>
 
 Imports an unencrypted private key from <keyfile> and creates a new account.
 Prints the address.
@@ -176,13 +177,13 @@ You must remember this password to unlock your account in the future.
 
 For non-interactive use the password can be specified with the -password flag:
 
-    geth account import [options] <keyfile>
+    {{.GETHCmd}} account import [options] <keyfile>
 
 Note:
-As you can directly copy your encrypted accounts to another ethereum instance,
+As you can directly copy your encrypted accounts to another {{.PlatformShortName}} instance,
 this import mechanism is not needed when you transfer an account between
 nodes.
-`,
+`),
 			},
 		},
 	}

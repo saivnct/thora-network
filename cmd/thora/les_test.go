@@ -19,6 +19,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -110,7 +111,7 @@ func ipcEndpoint(ipcPath, datadir string) string {
 var nextIPC = uint32(0)
 
 func startGethWithIpc(t *testing.T, name string, args ...string) *gethrpc {
-	ipcName := fmt.Sprintf("geth-%d.ipc", atomic.AddUint32(&nextIPC, 1))
+	ipcName := fmt.Sprintf("%s-%d.ipc", params.PlatformChainInfo.GETHCmd, atomic.AddUint32(&nextIPC, 1))
 	args = append([]string{"--networkid=42", "--port=0", "--authrpc.port", "0", "--ipcpath", ipcName}, args...)
 	t.Logf("Starting %v with rpc: %v", name, args)
 
@@ -134,7 +135,7 @@ func startGethWithIpc(t *testing.T, name string, args ...string) *gethrpc {
 
 func initGeth(t *testing.T) string {
 	args := []string{"--networkid=42", "init", "./testdata/clique.json"}
-	t.Logf("Initializing geth: %v ", args)
+	t.Logf("Initializing %s: %v ", params.PlatformChainInfo.GETHCmd, args)
 	g := runGeth(t, args...)
 	datadir := g.Datadir
 	g.WaitExit()
@@ -143,7 +144,7 @@ func initGeth(t *testing.T) string {
 
 func startLightServer(t *testing.T) *gethrpc {
 	datadir := initGeth(t)
-	t.Logf("Importing keys to geth")
+	t.Logf("Importing keys to %s", params.PlatformChainInfo.GETHCmd)
 	runGeth(t, "account", "import", "--datadir", datadir, "--password", "./testdata/password.txt", "--lightkdf", "./testdata/key.prv").WaitExit()
 	account := "0x02f0d131f1f97aef08aec6e3291b957d9efe7105"
 	server := startGethWithIpc(t, "lightserver", "--allow-insecure-unlock", "--datadir", datadir, "--password", "./testdata/password.txt", "--unlock", account, "--miner.etherbase=0x02f0d131f1f97aef08aec6e3291b957d9efe7105", "--mine", "--light.serve=100", "--light.maxpeers=1", "--discv4=false", "--nat=extip:127.0.0.1", "--verbosity=4")

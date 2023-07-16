@@ -18,6 +18,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -176,12 +177,12 @@ func TestCustomBackend(t *testing.T) {
 		{ // Can't start pebble on top of leveldb
 			initArgs:   []string{"--db.engine", "leveldb"},
 			execArgs:   []string{"--db.engine", "pebble"},
-			execExpect: `Fatal: Failed to register the Ethereum service: db.engine choice was pebble but found pre-existing leveldb database in specified data directory`,
+			execExpect: fmt.Sprintf(`Fatal: Failed to register the %s service: db.engine choice was pebble but found pre-existing leveldb database in specified data directory`, params.PlatformChainInfo.PlatformShortName),
 		},
 		{ // Can't start leveldb on top of pebble
 			initArgs:   []string{"--db.engine", "pebble"},
 			execArgs:   []string{"--db.engine", "leveldb"},
-			execExpect: `Fatal: Failed to register the Ethereum service: db.engine choice was leveldb but found pre-existing pebble database in specified data directory`,
+			execExpect: fmt.Sprintf(`Fatal: Failed to register the %s service: db.engine choice was leveldb but found pre-existing pebble database in specified data directory`, params.PlatformChainInfo.PlatformShortName),
 		},
 		{ // Reject invalid backend choice
 			initArgs:   []string{"--db.engine", "mssql"},

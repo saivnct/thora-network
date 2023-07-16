@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"os"
 	"runtime"
 	"strconv"
@@ -127,10 +128,10 @@ be gzipped.`,
 			utils.CacheFlag,
 			utils.SyncModeFlag,
 		}, utils.DatabasePathFlags),
-		Description: `
+		Description: params.WaterMarkText(`
 The import-preimages command imports hash preimages from an RLP encoded stream.
-It's deprecated, please use "geth db import" instead.
-`,
+It's deprecated, please use "{{.GETHCmd}} db import" instead.
+`),
 	}
 	exportPreimagesCommand = &cli.Command{
 		Action:    exportPreimages,
@@ -141,10 +142,10 @@ It's deprecated, please use "geth db import" instead.
 			utils.CacheFlag,
 			utils.SyncModeFlag,
 		}, utils.DatabasePathFlags),
-		Description: `
+		Description: params.WaterMarkText(`
 The export-preimages command exports hash preimages to an RLP encoded stream.
-It's deprecated, please use "geth db export" instead.
-`,
+It's deprecated, please use "{{.GETHCmd}} db export" instead.
+`),
 	}
 	dumpCommand = &cli.Command{
 		Action:    dump,

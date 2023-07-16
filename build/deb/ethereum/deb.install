@@ -1,5 +1,5 @@
 build/bin/{{.BinaryName}} usr/bin
-{{- if eq .BinaryName "geth" }}
-build/deb/ethereum/completions/bash/geth etc/bash_completion.d
-build/deb/ethereum/completions/zsh/_geth usr/share/zsh/vendor-completions
+{{- if eq .BinaryName "thora" }}
+build/deb/thora-network/completions/bash/thora etc/bash_completion.d
+build/deb/thora-network/completions/zsh/_thora usr/share/zsh/vendor-completions
 {{end -}}
