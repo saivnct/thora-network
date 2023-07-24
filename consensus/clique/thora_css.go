@@ -28,16 +28,20 @@ func (c *Clique) IsCurrentValidator(etherbase common.Address, chain consensus.Ch
 // Finalize implements consensus.Engine. There is no post-transaction
 // consensus rules in clique, do nothing here.
 func (c *Clique) Finalize(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, withdrawals []*types.Withdrawal) {
-	// Reward the signer.
-	parentHeader := chain.GetHeaderByHash(header.ParentHash)
-	if parentHeader.Number.Uint64() > 0 {
-		parentSigner, err := ecrecover(parentHeader, c.signatures)
-		if err != nil {
-			log.Error("Clique Finalize: ecrecover failed", "err", err)
-			return
-		}
+	if header.Number.Uint64() > 1 {
+		// Reward the signer.
+		parentHeader := chain.GetHeaderByHash(header.ParentHash)
 
-		//log.Info("Clique Finalize:", "blockNumber", header.Number, "coinbase", header.Coinbase, "reward", BlockReward, "signer", parentSigner)
-		state.AddBalance(parentSigner, BlockReward)
+		if parentHeader != nil {
+			if parentHeader.Extra != nil {
+				parentSigner, err := c.Author(parentHeader)
+				if err != nil {
+					log.Error("Clique Finalize: failed to get Author", "err", err)
+					return
+				}
+				state.AddBalance(parentSigner, BlockReward)
+			}
+
+		}
 	}
 }

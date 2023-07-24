@@ -20,6 +20,8 @@ import (
 	"bytes"
 	"crypto/ecdsa"
 	"fmt"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/trie"
 	"math/big"
 	"testing"
 
@@ -91,7 +93,7 @@ func (ap *testerAccountPool) sign(header *types.Header, signer string) {
 type testerVote struct {
 	signer     string
 	voted      string
-	auth       bool
+	auth       bool // auth: true, deauth: false
 	checkpoint []string
 	newbatch   bool
 }
@@ -431,6 +433,9 @@ func (tt *cliqueTest) run(t *testing.T) {
 			gen.SetNonce(nonce)
 		}
 	})
+
+	blocks = makeThoraChain2(genesis, blocks, accounts, tt)
+
 	// Iterate through the blocks and seal them individually
 	for j, block := range blocks {
 		// Get the header and prepare it for signing
@@ -505,4 +510,50 @@ func (tt *cliqueTest) run(t *testing.T) {
 			t.Fatalf("signer %d: signer mismatch: have %x, want %x", j, result[j], signers[j])
 		}
 	}
+}
+
+func makeThoraChain2(genesis *core.Genesis, blocks []*types.Block, accounts *testerAccountPool, tt *cliqueTest) []*types.Block {
+	newDb := rawdb.NewMemoryDatabase()
+	parent, err := genesis.Commit(newDb, trie.NewDatabase(newDb))
+	if err != nil {
+		panic(err)
+	}
+
+	newBlocks := make(types.Blocks, len(blocks))
+
+	for i, block := range blocks {
+		header := block.Header()
+
+		statedb, err := state.New(parent.Root(), state.NewDatabase(newDb), nil)
+		if err != nil {
+			panic(err)
+		}
+		receipts := []*types.Receipt{}
+		txs := []*types.Transaction{}
+
+		header.ParentHash = parent.Hash()
+
+		if i > 0 {
+			signer := accounts.address(tt.votes[i-1].signer)
+			statedb.AddBalance(signer, BlockReward)
+		}
+
+		header.Root = statedb.IntermediateRoot(genesis.Config.IsEIP158(header.Number))
+		newBlock := types.NewBlock(header, txs, nil, receipts, trie.NewStackTrie(nil))
+
+		// Write state changes to db
+		root, err := statedb.Commit(genesis.Config.IsEIP158(header.Number))
+		if err != nil {
+			panic(fmt.Sprintf("state write error: %v", err))
+		}
+
+		if err := statedb.Database().TrieDB().Commit(root, false); err != nil {
+			panic(fmt.Sprintf("trie write error: %v", err))
+		}
+
+		newBlocks[i] = newBlock
+		parent = newBlock
+	}
+
+	return newBlocks
 }

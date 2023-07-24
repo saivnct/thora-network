@@ -17,6 +17,10 @@
 package core
 
 import (
+	"fmt"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/trie"
 	"math/big"
 	"testing"
 	"time"
@@ -82,6 +86,54 @@ func TestHeaderVerification(t *testing.T) {
 func TestHeaderVerificationForMergingClique(t *testing.T) { testHeaderVerificationForMerging(t, true) }
 func TestHeaderVerificationForMergingEthash(t *testing.T) { testHeaderVerificationForMerging(t, false) }
 
+func makeThoraChain3(genesis *Genesis, blocks []*types.Block, signer common.Address) (ethdb.Database, []*types.Block) {
+	db := rawdb.NewMemoryDatabase()
+
+	parent, err := genesis.Commit(db, trie.NewDatabase(db))
+	var parentSigner *common.Address
+	if err != nil {
+		panic(err)
+	}
+
+	newBlocks := make(types.Blocks, len(blocks))
+
+	for i, block := range blocks {
+		header := block.Header()
+
+		statedb, err := state.New(parent.Root(), state.NewDatabase(db), nil)
+		if err != nil {
+			panic(err)
+		}
+		receipts := []*types.Receipt{}
+		txs := []*types.Transaction{}
+
+		header.ParentHash = parent.Hash()
+
+		if parentSigner != nil {
+			statedb.AddBalance(*parentSigner, clique.BlockReward)
+		}
+
+		header.Root = statedb.IntermediateRoot(genesis.Config.IsEIP158(header.Number))
+		newBlock := types.NewBlock(header, txs, nil, receipts, trie.NewStackTrie(nil))
+
+		// Write state changes to db
+		root, err := statedb.Commit(genesis.Config.IsEIP158(header.Number))
+		if err != nil {
+			panic(fmt.Sprintf("state write error: %v", err))
+		}
+
+		if err := statedb.Database().TrieDB().Commit(root, false); err != nil {
+			panic(fmt.Sprintf("trie write error: %v", err))
+		}
+
+		newBlocks[i] = newBlock
+		parent = newBlock
+		parentSigner = &signer
+	}
+
+	return db, newBlocks
+}
+
 // Tests the verification for eth1/2 merging, including pre-merge and post-merge
 func testHeaderVerificationForMerging(t *testing.T, isClique bool) {
 	var (
@@ -111,6 +163,9 @@ func testHeaderVerificationForMerging(t *testing.T, isClique bool) {
 
 		td := 0
 		genDb, blocks, _ := GenerateChainWithGenesis(gspec, engine, 8, nil)
+
+		genDb, blocks = makeThoraChain3(gspec, blocks, addr)
+
 		for i, block := range blocks {
 			header := block.Header()
 			if i > 0 {
