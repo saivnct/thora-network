@@ -18,6 +18,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"os"
 
 	"github.com/ethereum/go-ethereum/internal/debug"
@@ -26,7 +27,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var app = flags.NewApp("go-ethereum devp2p tool")
+var app = flags.NewApp(params.WaterMarkText("{{.PlatformName}} devp2p tool"))
 
 func init() {
 	app.Flags = append(app.Flags, debug.Flags...)

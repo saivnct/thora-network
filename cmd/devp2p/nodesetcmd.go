@@ -134,12 +134,12 @@ type nodeFilterC struct {
 }
 
 var filterFlags = map[string]nodeFilterC{
-	"-limit":       {1, trueFilter}, // needed to skip over -limit
-	"-ip":          {1, ipFilter},
-	"-min-age":     {1, minAgeFilter},
-	"-eth-network": {1, ethFilter},
-	"-les-server":  {0, lesFilter},
-	"-snap":        {0, snapFilter},
+	"-limit":   {1, trueFilter}, // needed to skip over -limit
+	"-ip":      {1, ipFilter},
+	"-min-age": {1, minAgeFilter},
+	params.WaterMarkText("-{{.GETHCmd}}-network"): {1, ethFilter},
+	"-les-server": {0, lesFilter},
+	"-snap":       {0, snapFilter},
 }
 
 // parseFilters parses nodeFilters from args.
@@ -228,7 +228,12 @@ func ethFilter(args []string) (nodeFilter, error) {
 	var filter forkid.Filter
 	switch args[0] {
 	case "mainnet":
-		filter = forkid.NewStaticFilter(params.MainnetChainConfig, params.MainnetGenesisHash)
+		filter = forkid.NewStaticFilter(params.ThoraMainnetChainConfig, params.ThoraGenesisHash)
+	case "oda":
+		filter = forkid.NewStaticFilter(params.OdaTestnetChainConfig, params.OdaGenesisHash)
+
+	//case "mainnet":
+	//	filter = forkid.NewStaticFilter(params.MainnetChainConfig, params.MainnetGenesisHash)
 	case "goerli":
 		filter = forkid.NewStaticFilter(params.GoerliChainConfig, params.GoerliGenesisHash)
 	case "sepolia":

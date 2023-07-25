@@ -103,6 +103,31 @@ func TestCreation(t *testing.T) {
 				{1735372, 1677557088, ID{Hash: checksumToBytes(0xf7f9bc08), Next: 0}},          // First Shanghai block
 			},
 		},
+
+		// Thora test cases
+		{
+			params.ThoraMainnetChainConfig,
+			params.ThoraGenesisHash,
+			[]testcase{
+				{0, 0, ID{Hash: checksumToBytes(0x6adb4d60), Next: 0}},                // Unsynced, last Frontier, Homestead, Tangerine, Spurious, Byzantium, Constantinople, Petersburg, Istanbul, Berlin and first London block
+				{1735370, 0, ID{Hash: checksumToBytes(0x6adb4d60), Next: 0}},          // Last London block
+				{1735371, 0, ID{Hash: checksumToBytes(0x6adb4d60), Next: 0}},          // First MergeNetsplit block
+				{1735372, 1677557087, ID{Hash: checksumToBytes(0x6adb4d60), Next: 0}}, // Last MergeNetsplit block
+				{1735372, 1677557088, ID{Hash: checksumToBytes(0x6adb4d60), Next: 0}}, // First Shanghai block
+			},
+		},
+		// Oda test cases
+		{
+			params.OdaTestnetChainConfig,
+			params.OdaGenesisHash,
+			[]testcase{
+				{0, 0, ID{Hash: checksumToBytes(0x3545a2f3), Next: 0}},                // Unsynced, last Frontier, Homestead, Tangerine, Spurious, Byzantium, Constantinople, Petersburg, Istanbul, Berlin and first London block
+				{1735370, 0, ID{Hash: checksumToBytes(0x3545a2f3), Next: 0}},          // Last London block
+				{1735371, 0, ID{Hash: checksumToBytes(0x3545a2f3), Next: 0}},          // First MergeNetsplit block
+				{1735372, 1677557087, ID{Hash: checksumToBytes(0x3545a2f3), Next: 0}}, // Last MergeNetsplit block
+				{1735372, 1677557088, ID{Hash: checksumToBytes(0x3545a2f3), Next: 0}}, // First Shanghai block
+			},
+		},
 	}
 	for i, tt := range tests {
 		for j, ttt := range tt.cases {
