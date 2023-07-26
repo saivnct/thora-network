@@ -188,8 +188,8 @@ func TestCustomBackend(t *testing.T) {
 			initArgs:   []string{"--db.engine", "mssql"},
 			initExpect: `Fatal: Invalid choice for db.engine 'mssql', allowed 'leveldb' or 'pebble'`,
 			// Since the init fails, this will return the (default) mainnet genesis
-			// block nonce
-			execExpect: `0x0000000000000042`,
+			// block nonce	of thora mainnet genesis block is 0x0000000000000000
+			execExpect: `0x0000000000000000`,
 		},
 	} {
 		if err := testfunc(t, tt); err != nil {

@@ -193,7 +193,7 @@ func CommitGenesisState(db ethdb.Database, triedb *trie.Database, blockhash comm
 		var genesis *Genesis
 		switch blockhash {
 		case params.ThoraGenesisHash:
-			genesis = DefaultGenesisBlock()
+			genesis = DefaultThoraGenesisBlock()
 		case params.OdaGenesisHash:
 			genesis = DefaultOdaGenesisBlock()
 
@@ -317,7 +317,7 @@ func SetupGenesisBlockWithOverride(db ethdb.Database, triedb *trie.Database, gen
 	if (stored == common.Hash{}) {
 		if genesis == nil {
 			log.Info("Writing default main-net genesis block")
-			genesis = DefaultGenesisBlock()
+			genesis = DefaultThoraGenesisBlock()
 		} else {
 			log.Info("Writing custom genesis block")
 		}
@@ -333,7 +333,7 @@ func SetupGenesisBlockWithOverride(db ethdb.Database, triedb *trie.Database, gen
 	header := rawdb.ReadHeader(db, stored, 0)
 	if header.Root != types.EmptyRootHash && !rawdb.HasLegacyTrieNode(db, header.Root) {
 		if genesis == nil {
-			genesis = DefaultGenesisBlock()
+			genesis = DefaultThoraGenesisBlock()
 		}
 		// Ensure the stored genesis matches with the given one.
 		hash := genesis.ToBlock().Hash()
@@ -373,7 +373,6 @@ func SetupGenesisBlockWithOverride(db ethdb.Database, triedb *trie.Database, gen
 	// on top of an existing private network genesis block). In that case, only
 	// apply the overrides.
 	if genesis == nil && stored != params.MainnetGenesisHash {
-		fmt.Println("genesis.go - Special case!!!!!!!!!!!!!!")
 		newcfg = storedcfg
 		applyOverrides(newcfg)
 	}
@@ -549,15 +548,19 @@ func (g *Genesis) MustCommit(db ethdb.Database) *types.Block {
 }
 
 // DefaultGenesisBlock returns the Ethereum main net genesis block.
-func DefaultGenesisBlock() *Genesis {
-	//return &Genesis{
-	//	Config:     params.MainnetChainConfig,
-	//	Nonce:      66,
-	//	ExtraData:  hexutil.MustDecode("0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa"),
-	//	GasLimit:   5000,
-	//	Difficulty: big.NewInt(17179869184),
-	//	Alloc:      decodePrealloc(mainnetAllocData),
-	//}
+//func DefaultGenesisBlock() *Genesis {
+//	return &Genesis{
+//		Config:     params.MainnetChainConfig,
+//		Nonce:      66,
+//		ExtraData:  hexutil.MustDecode("0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa"),
+//		GasLimit:   5000,
+//		Difficulty: big.NewInt(17179869184),
+//		Alloc:      decodePrealloc(mainnetAllocData),
+//	}
+//}
+
+// DefaultThoraGenesisBlock returns the Thora main net genesis block.
+func DefaultThoraGenesisBlock() *Genesis {
 	return &Genesis{
 		Config:     params.ThoraMainnetChainConfig,
 		Nonce:      0,
@@ -568,6 +571,7 @@ func DefaultGenesisBlock() *Genesis {
 	}
 }
 
+// DefaultOdaGenesisBlock returns the Oda test net genesis block.
 func DefaultOdaGenesisBlock() *Genesis {
 	return &Genesis{
 		Config:     params.OdaTestnetChainConfig,

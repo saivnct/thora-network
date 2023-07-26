@@ -102,7 +102,7 @@ func (f *fakeChain) Config() *params.ChainConfig {
 	return params.ThoraMainnetChainConfig
 }
 func (f *fakeChain) Genesis() *types.Block {
-	return core.DefaultGenesisBlock().ToBlock()
+	return core.DefaultThoraGenesisBlock().ToBlock()
 }
 func (f *fakeChain) CurrentHeader() *types.Header { return &types.Header{Number: big.NewInt(10000000)} }
 

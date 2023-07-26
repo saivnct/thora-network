@@ -79,7 +79,7 @@ func TestSetupGenesis(t *testing.T) {
 		{
 			name: "mainnet block in DB, genesis == nil",
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
-				DefaultGenesisBlock().MustCommit(db)
+				DefaultThoraGenesisBlock().MustCommit(db)
 				return SetupGenesisBlock(db, trie.NewDatabase(db), nil)
 			},
 			wantHash:   params.ThoraGenesisHash,
@@ -180,7 +180,7 @@ func TestGenesisHashes(t *testing.T) {
 		genesis *Genesis
 		want    common.Hash
 	}{
-		{DefaultGenesisBlock(), params.ThoraGenesisHash},
+		{DefaultThoraGenesisBlock(), params.ThoraGenesisHash},
 		{DefaultOdaGenesisBlock(), params.OdaGenesisHash},
 		//{DefaultGenesisBlock(), params.MainnetGenesisHash},
 		{DefaultGoerliGenesisBlock(), params.GoerliGenesisHash},

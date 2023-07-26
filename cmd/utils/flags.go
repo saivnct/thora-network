@@ -1761,7 +1761,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *ethconfig.Config) {
 		if !ctx.IsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 1
 		}
-		cfg.Genesis = core.DefaultGenesisBlock()
+		cfg.Genesis = core.DefaultThoraGenesisBlock()
 		SetDNSDiscoveryDefaults(cfg, params.MainnetGenesisHash)
 	case ctx.Bool(SepoliaFlag.Name):
 		if !ctx.IsSet(NetworkIdFlag.Name) {
@@ -2093,7 +2093,7 @@ func MakeGenesis(ctx *cli.Context) *core.Genesis {
 	var genesis *core.Genesis
 	switch {
 	case ctx.Bool(MainnetFlag.Name):
-		genesis = core.DefaultGenesisBlock()
+		genesis = core.DefaultThoraGenesisBlock()
 	case ctx.Bool(SepoliaFlag.Name):
 		genesis = core.DefaultSepoliaGenesisBlock()
 	case ctx.Bool(GoerliFlag.Name):
