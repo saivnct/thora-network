@@ -12,6 +12,10 @@ var PlatformChainInfo = struct {
 	CoinName                   string
 	GETHCmd                    string
 	IPCPath                    string
+
+	TestPlatformName               string
+	TestPlatformShortName          string
+	TestPlatformShortNameLowerCase string
 }{
 	PlatformName:               "Thora Network",
 	PlatformShortName:          "Thora", //Ethereum
@@ -19,6 +23,10 @@ var PlatformChainInfo = struct {
 	CoinName:                   "THA",
 	GETHCmd:                    "thora", //must be same with geth/main.go => clientIdentifier
 	IPCPath:                    "thora.ipc",
+
+	TestPlatformName:               "Oda Test Network",
+	TestPlatformShortName:          "Oda",
+	TestPlatformShortNameLowerCase: "oda",
 }
 
 func WaterMarkText(inText string) string {

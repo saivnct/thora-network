@@ -99,8 +99,8 @@ var (
 	}
 	chainIdFlag = &cli.Int64Flag{
 		Name:  "chainid",
-		Value: params.ThoraMainnetChainConfig.ChainID.Int64(),
-		Usage: "Chain id to use for signing (686868=mainnet, 686868=testnet)",
+		Value: params.PlatformMainnetChainConfig.ChainID.Int64(),
+		Usage: "Chain id to use for signing (686868=mainnet, 696969=testnet)",
 	}
 	rpcPortFlag = &cli.IntFlag{
 		Name:     "http.port",

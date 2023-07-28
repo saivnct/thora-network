@@ -434,7 +434,7 @@ func (tt *cliqueTest) run(t *testing.T) {
 		}
 	})
 
-	blocks = makeThoraChain2(genesis, blocks, accounts, tt)
+	blocks = makePlatformChain2(genesis, blocks, accounts, tt)
 
 	// Iterate through the blocks and seal them individually
 	for j, block := range blocks {
@@ -512,7 +512,7 @@ func (tt *cliqueTest) run(t *testing.T) {
 	}
 }
 
-func makeThoraChain2(genesis *core.Genesis, blocks []*types.Block, accounts *testerAccountPool, tt *cliqueTest) []*types.Block {
+func makePlatformChain2(genesis *core.Genesis, blocks []*types.Block, accounts *testerAccountPool, tt *cliqueTest) []*types.Block {
 	newDb := rawdb.NewMemoryDatabase()
 	parent, err := genesis.Commit(newDb, trie.NewDatabase(newDb))
 	if err != nil {

@@ -228,16 +228,16 @@ func ethFilter(args []string) (nodeFilter, error) {
 	var filter forkid.Filter
 	switch args[0] {
 	case "mainnet":
-		filter = forkid.NewStaticFilter(params.ThoraMainnetChainConfig, params.ThoraGenesisHash)
-	case "oda":
-		filter = forkid.NewStaticFilter(params.OdaTestnetChainConfig, params.OdaGenesisHash)
+		filter = forkid.NewStaticFilter(params.PlatformMainnetChainConfig, params.PlatformMainNetGenesisHash)
+	case "testnet":
+		filter = forkid.NewStaticFilter(params.PlatformTestnetChainConfig, params.PlatformTestNetGenesisHash)
 
 	//case "mainnet":
 	//	filter = forkid.NewStaticFilter(params.MainnetChainConfig, params.MainnetGenesisHash)
-	case "goerli":
-		filter = forkid.NewStaticFilter(params.GoerliChainConfig, params.GoerliGenesisHash)
-	case "sepolia":
-		filter = forkid.NewStaticFilter(params.SepoliaChainConfig, params.SepoliaGenesisHash)
+	//case "goerli":
+	//	filter = forkid.NewStaticFilter(params.GoerliChainConfig, params.GoerliGenesisHash)
+	//case "sepolia":
+	//	filter = forkid.NewStaticFilter(params.SepoliaChainConfig, params.SepoliaGenesisHash)
 	default:
 		return nil, fmt.Errorf("unknown network %q", args[0])
 	}

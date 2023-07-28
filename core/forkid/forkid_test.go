@@ -104,10 +104,10 @@ func TestCreation(t *testing.T) {
 			},
 		},
 
-		// Thora test cases
+		// Platform Mainnet test cases
 		{
-			params.ThoraMainnetChainConfig,
-			params.ThoraGenesisHash,
+			params.PlatformMainnetChainConfig,
+			params.PlatformMainNetGenesisHash,
 			[]testcase{
 				{0, 0, ID{Hash: checksumToBytes(0x6adb4d60), Next: 0}},                // Unsynced, last Frontier, Homestead, Tangerine, Spurious, Byzantium, Constantinople, Petersburg, Istanbul, Berlin and first London block
 				{1735370, 0, ID{Hash: checksumToBytes(0x6adb4d60), Next: 0}},          // Last London block
@@ -116,16 +116,16 @@ func TestCreation(t *testing.T) {
 				{1735372, 1677557088, ID{Hash: checksumToBytes(0x6adb4d60), Next: 0}}, // First Shanghai block
 			},
 		},
-		// Oda test cases
+		// Platform Testnet test cases
 		{
-			params.OdaTestnetChainConfig,
-			params.OdaGenesisHash,
+			params.PlatformTestnetChainConfig,
+			params.PlatformTestNetGenesisHash,
 			[]testcase{
-				{0, 0, ID{Hash: checksumToBytes(0x3545a2f3), Next: 0}},                // Unsynced, last Frontier, Homestead, Tangerine, Spurious, Byzantium, Constantinople, Petersburg, Istanbul, Berlin and first London block
-				{1735370, 0, ID{Hash: checksumToBytes(0x3545a2f3), Next: 0}},          // Last London block
-				{1735371, 0, ID{Hash: checksumToBytes(0x3545a2f3), Next: 0}},          // First MergeNetsplit block
-				{1735372, 1677557087, ID{Hash: checksumToBytes(0x3545a2f3), Next: 0}}, // Last MergeNetsplit block
-				{1735372, 1677557088, ID{Hash: checksumToBytes(0x3545a2f3), Next: 0}}, // First Shanghai block
+				{0, 0, ID{Hash: checksumToBytes(0x911d5022), Next: 0}},                // Unsynced, last Frontier, Homestead, Tangerine, Spurious, Byzantium, Constantinople, Petersburg, Istanbul, Berlin and first London block
+				{1735370, 0, ID{Hash: checksumToBytes(0x911d5022), Next: 0}},          // Last London block
+				{1735371, 0, ID{Hash: checksumToBytes(0x911d5022), Next: 0}},          // First MergeNetsplit block
+				{1735372, 1677557087, ID{Hash: checksumToBytes(0x911d5022), Next: 0}}, // Last MergeNetsplit block
+				{1735372, 1677557088, ID{Hash: checksumToBytes(0x911d5022), Next: 0}}, // First Shanghai block
 			},
 		},
 	}

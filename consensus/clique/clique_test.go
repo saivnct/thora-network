@@ -35,7 +35,7 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 )
 
-func makeThoraChain(genesis *core.Genesis, engine consensus.Engine, blocks []*types.Block, signer common.Address, key *ecdsa.PrivateKey, txSigner *types.HomesteadSigner) []*types.Block {
+func makePlatformChain(genesis *core.Genesis, engine consensus.Engine, blocks []*types.Block, signer common.Address, key *ecdsa.PrivateKey, txSigner *types.HomesteadSigner) []*types.Block {
 	newDb := rawdb.NewMemoryDatabase()
 	parent, err := genesis.Commit(newDb, trie.NewDatabase(newDb))
 	var parentSigner *common.Address
@@ -163,7 +163,7 @@ func TestReimportMirroredState(t *testing.T) {
 		//}
 	})
 
-	blocks = makeThoraChain(genspec, engine, blocks, addr, key, signer)
+	blocks = makePlatformChain(genspec, engine, blocks, addr, key, signer)
 
 	for i, block := range blocks {
 		header := block.Header()

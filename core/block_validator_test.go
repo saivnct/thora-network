@@ -86,7 +86,7 @@ func TestHeaderVerification(t *testing.T) {
 func TestHeaderVerificationForMergingClique(t *testing.T) { testHeaderVerificationForMerging(t, true) }
 func TestHeaderVerificationForMergingEthash(t *testing.T) { testHeaderVerificationForMerging(t, false) }
 
-func makeThoraChain3(genesis *Genesis, blocks []*types.Block, signer common.Address) (ethdb.Database, []*types.Block) {
+func makePlatformChain3(genesis *Genesis, blocks []*types.Block, signer common.Address) (ethdb.Database, []*types.Block) {
 	db := rawdb.NewMemoryDatabase()
 
 	parent, err := genesis.Commit(db, trie.NewDatabase(db))
@@ -164,7 +164,7 @@ func testHeaderVerificationForMerging(t *testing.T, isClique bool) {
 		td := 0
 		genDb, blocks, _ := GenerateChainWithGenesis(gspec, engine, 8, nil)
 
-		genDb, blocks = makeThoraChain3(gspec, blocks, addr)
+		genDb, blocks = makePlatformChain3(gspec, blocks, addr)
 
 		for i, block := range blocks {
 			header := block.Header()

@@ -192,17 +192,17 @@ func CommitGenesisState(db ethdb.Database, triedb *trie.Database, blockhash comm
 		// - private network, can't recover
 		var genesis *Genesis
 		switch blockhash {
-		case params.ThoraGenesisHash:
-			genesis = DefaultThoraGenesisBlock()
-		case params.OdaGenesisHash:
-			genesis = DefaultOdaGenesisBlock()
+		case params.PlatformMainNetGenesisHash:
+			genesis = DefaultMainnetGenesisBlock()
+		case params.PlatformTestNetGenesisHash:
+			genesis = DefaultTestnetGenesisBlock()
 
-		//case params.MainnetGenesisHash:
-		//	genesis = DefaultGenesisBlock()
-		case params.GoerliGenesisHash:
-			genesis = DefaultGoerliGenesisBlock()
-		case params.SepoliaGenesisHash:
-			genesis = DefaultSepoliaGenesisBlock()
+			//case params.MainnetGenesisHash:
+			//	genesis = DefaultGenesisBlock()
+			//case params.GoerliGenesisHash:
+			//	genesis = DefaultGoerliGenesisBlock()
+			//case params.SepoliaGenesisHash:
+			//	genesis = DefaultSepoliaGenesisBlock()
 		}
 		if genesis != nil {
 			alloc = genesis.Alloc
@@ -317,7 +317,7 @@ func SetupGenesisBlockWithOverride(db ethdb.Database, triedb *trie.Database, gen
 	if (stored == common.Hash{}) {
 		if genesis == nil {
 			log.Info("Writing default main-net genesis block")
-			genesis = DefaultThoraGenesisBlock()
+			genesis = DefaultMainnetGenesisBlock()
 		} else {
 			log.Info("Writing custom genesis block")
 		}
@@ -333,7 +333,7 @@ func SetupGenesisBlockWithOverride(db ethdb.Database, triedb *trie.Database, gen
 	header := rawdb.ReadHeader(db, stored, 0)
 	if header.Root != types.EmptyRootHash && !rawdb.HasLegacyTrieNode(db, header.Root) {
 		if genesis == nil {
-			genesis = DefaultThoraGenesisBlock()
+			genesis = DefaultMainnetGenesisBlock()
 		}
 		// Ensure the stored genesis matches with the given one.
 		hash := genesis.ToBlock().Hash()
@@ -424,24 +424,24 @@ func LoadChainConfig(db ethdb.Database, genesis *Genesis) (*params.ChainConfig, 
 	// There is no stored chain config and no new config provided,
 	// In this case the default chain config(mainnet) will be used
 	//return params.MainnetChainConfig, nil
-	return params.ThoraMainnetChainConfig, nil
+	return params.PlatformMainnetChainConfig, nil
 }
 
 func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 	switch {
 	case g != nil:
 		return g.Config
-	case ghash == params.ThoraGenesisHash:
-		return params.ThoraMainnetChainConfig
-	case ghash == params.OdaGenesisHash:
-		return params.OdaTestnetChainConfig
+	case ghash == params.PlatformMainNetGenesisHash:
+		return params.PlatformMainnetChainConfig
+	case ghash == params.PlatformTestNetGenesisHash:
+		return params.PlatformTestnetChainConfig
 
 	//case ghash == params.MainnetGenesisHash:
 	//	return params.MainnetChainConfig
-	case ghash == params.SepoliaGenesisHash:
-		return params.SepoliaChainConfig
-	case ghash == params.GoerliGenesisHash:
-		return params.GoerliChainConfig
+	//case ghash == params.SepoliaGenesisHash:
+	//	return params.SepoliaChainConfig
+	//case ghash == params.GoerliGenesisHash:
+	//	return params.GoerliChainConfig
 	default:
 		return params.AllEthashProtocolChanges
 	}
@@ -559,52 +559,53 @@ func (g *Genesis) MustCommit(db ethdb.Database) *types.Block {
 //	}
 //}
 
-// DefaultThoraGenesisBlock returns the Thora main net genesis block.
-func DefaultThoraGenesisBlock() *Genesis {
-	return &Genesis{
-		Config:     params.ThoraMainnetChainConfig,
-		Nonce:      0,
-		ExtraData:  hexutil.MustDecode("0x000000000000000000000000000000000000000000000000000000000000000004f9197A122883876f4c03b809A9f4D1373e5d1994a0fe41E0caeD01c1993033669C945FdF25Eec2cA6c5ffd442e875AbfeB41CC69FdB2eA2Ac8B32E0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
-		GasLimit:   30000000,
-		Difficulty: big.NewInt(1),
-		Alloc:      decodePrealloc(thoraAllocData),
-	}
-}
-
-// DefaultOdaGenesisBlock returns the Oda test net genesis block.
-func DefaultOdaGenesisBlock() *Genesis {
-	return &Genesis{
-		Config:     params.OdaTestnetChainConfig,
-		Nonce:      0,
-		ExtraData:  hexutil.MustDecode("0x000000000000000000000000000000000000000000000000000000000000000004f9197A122883876f4c03b809A9f4D1373e5d1994a0fe41E0caeD01c1993033669C945FdF25Eec2cA6c5ffd442e875AbfeB41CC69FdB2eA2Ac8B32E0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
-		GasLimit:   30000000,
-		Difficulty: big.NewInt(1),
-		Alloc:      decodePrealloc(odaAllocData),
-	}
-}
-
 // DefaultGoerliGenesisBlock returns the Görli network genesis block.
-func DefaultGoerliGenesisBlock() *Genesis {
-	return &Genesis{
-		Config:     params.GoerliChainConfig,
-		Timestamp:  1548854791,
-		ExtraData:  hexutil.MustDecode("0x22466c6578692069732061207468696e6722202d204166726900000000000000e0a2bd4258d2768837baa26a28fe71dc079f84c70000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
-		GasLimit:   10485760,
-		Difficulty: big.NewInt(1),
-		Alloc:      decodePrealloc(goerliAllocData),
-	}
-}
+//func DefaultGoerliGenesisBlock() *Genesis {
+//	return &Genesis{
+//		Config:     params.GoerliChainConfig,
+//		Timestamp:  1548854791,
+//		ExtraData:  hexutil.MustDecode("0x22466c6578692069732061207468696e6722202d204166726900000000000000e0a2bd4258d2768837baa26a28fe71dc079f84c70000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+//		GasLimit:   10485760,
+//		Difficulty: big.NewInt(1),
+//		Alloc:      decodePrealloc(goerliAllocData),
+//	}
+//}
 
 // DefaultSepoliaGenesisBlock returns the Sepolia network genesis block.
-func DefaultSepoliaGenesisBlock() *Genesis {
+//func DefaultSepoliaGenesisBlock() *Genesis {
+//	return &Genesis{
+//		Config:     params.SepoliaChainConfig,
+//		Nonce:      0,
+//		ExtraData:  []byte("Sepolia, Athens, Attica, Greece!"),
+//		GasLimit:   0x1c9c380,
+//		Difficulty: big.NewInt(0x20000),
+//		Timestamp:  1633267481,
+//		Alloc:      decodePrealloc(sepoliaAllocData),
+//	}
+//}
+
+// DefaultMainnetGenesisBlock returns the Platform main net genesis block.
+func DefaultMainnetGenesisBlock() *Genesis {
 	return &Genesis{
-		Config:     params.SepoliaChainConfig,
+		Config:     params.PlatformMainnetChainConfig,
 		Nonce:      0,
-		ExtraData:  []byte("Sepolia, Athens, Attica, Greece!"),
-		GasLimit:   0x1c9c380,
-		Difficulty: big.NewInt(0x20000),
-		Timestamp:  1633267481,
-		Alloc:      decodePrealloc(sepoliaAllocData),
+		ExtraData:  hexutil.MustDecode("0x000000000000000000000000000000000000000000000000000000000000000004f9197A122883876f4c03b809A9f4D1373e5d1994a0fe41E0caeD01c1993033669C945FdF25Eec2cA6c5ffd442e875AbfeB41CC69FdB2eA2Ac8B32E0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+		GasLimit:   30000000,
+		Difficulty: big.NewInt(1),
+		Alloc:      decodePrealloc(platformMainnetAllocData),
+	}
+}
+
+// DefaultTestnetGenesisBlock returns the Platform test net genesis block.
+func DefaultTestnetGenesisBlock() *Genesis {
+	return &Genesis{
+		Config:     params.PlatformTestnetChainConfig,
+		Timestamp:  1583482152,
+		Nonce:      0,
+		ExtraData:  hexutil.MustDecode("0x000000000000000000000000000000000000000000000000000000000000000004f9197A122883876f4c03b809A9f4D1373e5d1994a0fe41E0caeD01c1993033669C945FdF25Eec2cA6c5ffd442e875AbfeB41CC69FdB2eA2Ac8B32E0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+		GasLimit:   30000000,
+		Difficulty: big.NewInt(1),
+		Alloc:      decodePrealloc(platformTestnetAllocData),
 	}
 }
 

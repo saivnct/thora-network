@@ -33,7 +33,7 @@ import (
 )
 
 func TestInvalidCliqueConfig(t *testing.T) {
-	block := DefaultGoerliGenesisBlock()
+	block := DefaultTestnetGenesisBlock()
 	block.ExtraData = []byte{}
 	db := rawdb.NewMemoryDatabase()
 	if _, err := block.Commit(db, trie.NewDatabase(db)); err == nil {
@@ -73,17 +73,17 @@ func TestSetupGenesis(t *testing.T) {
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
 				return SetupGenesisBlock(db, trie.NewDatabase(db), nil)
 			},
-			wantHash:   params.ThoraGenesisHash,
-			wantConfig: params.ThoraMainnetChainConfig,
+			wantHash:   params.PlatformMainNetGenesisHash,
+			wantConfig: params.PlatformMainnetChainConfig,
 		},
 		{
 			name: "mainnet block in DB, genesis == nil",
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
-				DefaultThoraGenesisBlock().MustCommit(db)
+				DefaultMainnetGenesisBlock().MustCommit(db)
 				return SetupGenesisBlock(db, trie.NewDatabase(db), nil)
 			},
-			wantHash:   params.ThoraGenesisHash,
-			wantConfig: params.ThoraMainnetChainConfig,
+			wantHash:   params.PlatformMainNetGenesisHash,
+			wantConfig: params.PlatformMainnetChainConfig,
 		},
 		{
 			name: "custom block in DB, genesis == nil",
@@ -95,24 +95,14 @@ func TestSetupGenesis(t *testing.T) {
 			wantConfig: customg.Config,
 		},
 		{
-			name: "custom block in DB, genesis == oda",
+			name: "custom block in DB, genesis == testnet",
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
 				customg.MustCommit(db)
-				return SetupGenesisBlock(db, trie.NewDatabase(db), DefaultOdaGenesisBlock())
+				return SetupGenesisBlock(db, trie.NewDatabase(db), DefaultTestnetGenesisBlock())
 			},
-			wantErr:    &GenesisMismatchError{Stored: customghash, New: params.OdaGenesisHash},
-			wantHash:   params.OdaGenesisHash,
-			wantConfig: params.OdaTestnetChainConfig,
-		},
-		{
-			name: "custom block in DB, genesis == goerli",
-			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
-				customg.MustCommit(db)
-				return SetupGenesisBlock(db, trie.NewDatabase(db), DefaultGoerliGenesisBlock())
-			},
-			wantErr:    &GenesisMismatchError{Stored: customghash, New: params.GoerliGenesisHash},
-			wantHash:   params.GoerliGenesisHash,
-			wantConfig: params.GoerliChainConfig,
+			wantErr:    &GenesisMismatchError{Stored: customghash, New: params.PlatformTestNetGenesisHash},
+			wantHash:   params.PlatformTestNetGenesisHash,
+			wantConfig: params.PlatformTestnetChainConfig,
 		},
 		{
 			name: "compatible config in DB",
@@ -180,11 +170,12 @@ func TestGenesisHashes(t *testing.T) {
 		genesis *Genesis
 		want    common.Hash
 	}{
-		{DefaultThoraGenesisBlock(), params.ThoraGenesisHash},
-		{DefaultOdaGenesisBlock(), params.OdaGenesisHash},
+		{DefaultMainnetGenesisBlock(), params.PlatformMainNetGenesisHash},
+		{DefaultTestnetGenesisBlock(), params.PlatformTestNetGenesisHash},
+
 		//{DefaultGenesisBlock(), params.MainnetGenesisHash},
-		{DefaultGoerliGenesisBlock(), params.GoerliGenesisHash},
-		{DefaultSepoliaGenesisBlock(), params.SepoliaGenesisHash},
+		//{DefaultGoerliGenesisBlock(), params.GoerliGenesisHash},
+		//{DefaultSepoliaGenesisBlock(), params.SepoliaGenesisHash},
 	} {
 		// Test via MustCommit
 		if have := c.genesis.MustCommit(rawdb.NewMemoryDatabase()).Hash(); have != c.want {

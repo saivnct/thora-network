@@ -29,16 +29,16 @@ var (
 	SepoliaGenesisHash = common.HexToHash("0x25a5cc106eea7138acab33231d7160d69cb777ee0c2c553fcddf5138993e6dd9")
 	GoerliGenesisHash  = common.HexToHash("0xbf7e331f7f7c1dd2e05159666b3bf8bc7a8a3a9eb1d518969eab529dd9b88c1a")
 
-	ThoraGenesisHash = common.HexToHash("0x60feb258a4dc05860f315e680435a82523d0987a599c7817131a2f732b1037ad")
-	OdaGenesisHash   = common.HexToHash("0x70611c0b95a89e85810fdee715f195a1308cfd34ecd9d8c457ad2153f9fb0a9f")
+	PlatformMainNetGenesisHash = common.HexToHash("0x60feb258a4dc05860f315e680435a82523d0987a599c7817131a2f732b1037ad")
+	PlatformTestNetGenesisHash = common.HexToHash("0xd19afbaf954008a9428b8f70eeb3828e339d73a338001f5eebef2acd557fa0a5")
 )
 
 func newUint64(val uint64) *uint64 { return &val }
 
 var (
 
-	// ThoraMainnetChainConfig contains the chain parameters to run a node on the Thora main network.
-	ThoraMainnetChainConfig = &ChainConfig{
+	// PlatformMainnetChainConfig contains the chain parameters to run a node on the Platform main network.
+	PlatformMainnetChainConfig = &ChainConfig{
 		ChainID:                       big.NewInt(686868),
 		HomesteadBlock:                big.NewInt(0),
 		DAOForkBlock:                  nil,
@@ -66,8 +66,8 @@ var (
 		Clique:                        &CliqueConfig{Period: 5, Epoch: 30000},
 	}
 
-	// OdaTestnetChainConfig contains the chain parameters to run a node on the Oda test network.
-	OdaTestnetChainConfig = &ChainConfig{
+	// PlatformTestnetChainConfig contains the chain parameters to run a node on the Platform test network.
+	PlatformTestnetChainConfig = &ChainConfig{
 		ChainID:                       big.NewInt(696969),
 		HomesteadBlock:                big.NewInt(0),
 		DAOForkBlock:                  nil,
@@ -317,8 +317,8 @@ var NetworkNames = map[string]string{
 	GoerliChainConfig.ChainID.String():  "goerli",
 	SepoliaChainConfig.ChainID.String(): "sepolia",
 
-	ThoraMainnetChainConfig.ChainID.String(): "thora",
-	OdaTestnetChainConfig.ChainID.String():   "oda",
+	PlatformMainnetChainConfig.ChainID.String(): PlatformChainInfo.PlatformShortNameLowerCase,
+	PlatformTestnetChainConfig.ChainID.String(): PlatformChainInfo.TestPlatformShortNameLowerCase,
 }
 
 // ChainConfig is the core config which determines the blockchain settings.

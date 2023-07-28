@@ -99,10 +99,10 @@ type fakeChain struct{}
 
 func (f *fakeChain) Config() *params.ChainConfig {
 	//return params.MainnetChainConfig
-	return params.ThoraMainnetChainConfig
+	return params.PlatformMainnetChainConfig
 }
 func (f *fakeChain) Genesis() *types.Block {
-	return core.DefaultThoraGenesisBlock().ToBlock()
+	return core.DefaultMainnetGenesisBlock().ToBlock()
 }
 func (f *fakeChain) CurrentHeader() *types.Header { return &types.Header{Number: big.NewInt(10000000)} }
 
