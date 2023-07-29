@@ -100,7 +100,7 @@ var (
 	chainIdFlag = &cli.Int64Flag{
 		Name:  "chainid",
 		Value: params.PlatformMainnetChainConfig.ChainID.Int64(),
-		Usage: "Chain id to use for signing (686868=mainnet, 696969=testnet)",
+		Usage: fmt.Sprintf("Chain id to use for signing (%d=mainnet, %d=testnet)", params.PlatformMainnetChainConfig.ChainID.Int64(), params.PlatformTestnetChainConfig.ChainID.Int64()),
 	}
 	rpcPortFlag = &cli.IntFlag{
 		Name:     "http.port",

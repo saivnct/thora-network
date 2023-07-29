@@ -26,8 +26,8 @@ import (
 // Genesis hashes to enforce below configs on.
 var (
 	MainnetGenesisHash = common.HexToHash("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3")
-	SepoliaGenesisHash = common.HexToHash("0x25a5cc106eea7138acab33231d7160d69cb777ee0c2c553fcddf5138993e6dd9")
-	GoerliGenesisHash  = common.HexToHash("0xbf7e331f7f7c1dd2e05159666b3bf8bc7a8a3a9eb1d518969eab529dd9b88c1a")
+	//SepoliaGenesisHash = common.HexToHash("0x25a5cc106eea7138acab33231d7160d69cb777ee0c2c553fcddf5138993e6dd9")
+	//GoerliGenesisHash = common.HexToHash("0xbf7e331f7f7c1dd2e05159666b3bf8bc7a8a3a9eb1d518969eab529dd9b88c1a")
 
 	PlatformMainNetGenesisHash = common.HexToHash("0x60feb258a4dc05860f315e680435a82523d0987a599c7817131a2f732b1037ad")
 	PlatformTestNetGenesisHash = common.HexToHash("0xd19afbaf954008a9428b8f70eeb3828e339d73a338001f5eebef2acd557fa0a5")
@@ -121,7 +121,7 @@ var (
 		Ethash:                        new(EthashConfig),
 	}
 
-	// SepoliaChainConfig contains the chain parameters to run a node on the Sepolia test network.
+	/*// SepoliaChainConfig contains the chain parameters to run a node on the Sepolia test network.
 	SepoliaChainConfig = &ChainConfig{
 		ChainID:                       big.NewInt(11155111),
 		HomesteadBlock:                big.NewInt(0),
@@ -167,7 +167,8 @@ var (
 			Period: 15,
 			Epoch:  30000,
 		},
-	}
+	}*/
+
 	// AllEthashProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Ethash consensus.
 	AllEthashProtocolChanges = &ChainConfig{
@@ -314,8 +315,8 @@ var (
 // NetworkNames are user friendly names to use in the chain spec banner.
 var NetworkNames = map[string]string{
 	MainnetChainConfig.ChainID.String(): "mainnet",
-	GoerliChainConfig.ChainID.String():  "goerli",
-	SepoliaChainConfig.ChainID.String(): "sepolia",
+	//GoerliChainConfig.ChainID.String():  "goerli",
+	//SepoliaChainConfig.ChainID.String(): "sepolia",
 
 	PlatformMainnetChainConfig.ChainID.String(): PlatformChainInfo.PlatformShortNameLowerCase,
 	PlatformTestnetChainConfig.ChainID.String(): PlatformChainInfo.TestPlatformShortNameLowerCase,
@@ -423,7 +424,7 @@ func (c *ChainConfig) Description() string {
 	}
 	banner += "\n"
 
-	// Create a list of forks with a short description of them. Forks that only
+	/*// Create a list of forks with a short description of them. Forks that only
 	// makes sense for mainnet should be optional at printing to avoid bloating
 	// the output for testnets and private networks.
 	banner += "Pre-Merge hard forks (block based):\n"
@@ -479,7 +480,8 @@ func (c *ChainConfig) Description() string {
 	}
 	if c.VerkleTime != nil {
 		banner += fmt.Sprintf(" - Verkle:                      @%-10v\n", *c.VerkleTime)
-	}
+	}*/
+
 	return banner
 }
 

@@ -74,7 +74,7 @@ func TestCreation(t *testing.T) {
 				{30000000, 2000000000, ID{Hash: checksumToBytes(0xdce96c2d), Next: 0}},          // Future Shanghai block
 			},
 		},
-		// Goerli test cases
+		/*// Goerli test cases
 		{
 			params.GoerliChainConfig,
 			params.GoerliGenesisHash,
@@ -102,7 +102,7 @@ func TestCreation(t *testing.T) {
 				{1735372, 1677557087, ID{Hash: checksumToBytes(0xb96cbd13), Next: 1677557088}}, // Last MergeNetsplit block
 				{1735372, 1677557088, ID{Hash: checksumToBytes(0xf7f9bc08), Next: 0}},          // First Shanghai block
 			},
-		},
+		},*/
 
 		// Platform Mainnet test cases
 		{

@@ -459,7 +459,7 @@ var (
 		Category: flags.MinerCategory,
 	}
 	MinerEtherbaseFlag = &cli.StringFlag{
-		Name:     "miner.etherbase",
+		Name:     "miner.coinbase",
 		Usage:    "0x prefixed public address for block mining rewards",
 		Category: flags.MinerCategory,
 	}
@@ -2072,7 +2072,6 @@ func DialRPCWithHeaders(endpoint string, headers []string) (*rpc.Client, error) 
 }
 
 func MakeGenesis(ctx *cli.Context) *core.Genesis {
-	fmt.Println("MakeGenesis!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 	var genesis *core.Genesis
 	switch {
 	case ctx.Bool(MainnetFlag.Name):

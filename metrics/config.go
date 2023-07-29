@@ -16,6 +16,8 @@
 
 package metrics
 
+import "github.com/ethereum/go-ethereum/params"
+
 // Config contains the configuration for the metric collection.
 type Config struct {
 	Enabled          bool   `toml:",omitempty"`
@@ -43,7 +45,7 @@ var DefaultConfig = Config{
 	Port:             6060,
 	EnableInfluxDB:   false,
 	InfluxDBEndpoint: "http://localhost:8086",
-	InfluxDBDatabase: "geth",
+	InfluxDBDatabase: params.PlatformChainInfo.PlatformShortNameLowerCase, //"geth"
 	InfluxDBUsername: "test",
 	InfluxDBPassword: "test",
 	InfluxDBTags:     "host=localhost",
@@ -51,6 +53,6 @@ var DefaultConfig = Config{
 	// influxdbv2-specific flags
 	EnableInfluxDBV2:     false,
 	InfluxDBToken:        "test",
-	InfluxDBBucket:       "geth",
-	InfluxDBOrganization: "geth",
+	InfluxDBBucket:       params.PlatformChainInfo.PlatformShortNameLowerCase, //"geth"
+	InfluxDBOrganization: params.PlatformChainInfo.PlatformShortNameLowerCase, //"geth"
 }

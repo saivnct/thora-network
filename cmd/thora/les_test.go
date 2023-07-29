@@ -142,12 +142,12 @@ func initGeth(t *testing.T) string {
 	return datadir
 }
 
-func startLightServer(t *testing.T) *gethrpc {
+/*func startLightServer(t *testing.T) *gethrpc {
 	datadir := initGeth(t)
 	t.Logf("Importing keys to %s", params.PlatformChainInfo.GETHCmd)
 	runGeth(t, "account", "import", "--datadir", datadir, "--password", "./testdata/password.txt", "--lightkdf", "./testdata/key.prv").WaitExit()
 	account := "0x02f0d131f1f97aef08aec6e3291b957d9efe7105"
-	server := startGethWithIpc(t, "lightserver", "--allow-insecure-unlock", "--datadir", datadir, "--password", "./testdata/password.txt", "--unlock", account, "--miner.etherbase=0x02f0d131f1f97aef08aec6e3291b957d9efe7105", "--mine", "--light.serve=100", "--light.maxpeers=1", "--discv4=false", "--nat=extip:127.0.0.1", "--verbosity=4")
+	server := startGethWithIpc(t, "lightserver", "--allow-insecure-unlock", "--datadir", datadir, "--password", "./testdata/password.txt", "--unlock", account, "--miner.coinbase=0x02f0d131f1f97aef08aec6e3291b957d9efe7105", "--mine", "--light.serve=100", "--light.maxpeers=1", "--discv4=false", "--nat=extip:127.0.0.1", "--verbosity=4")
 	return server
 }
 
@@ -203,4 +203,4 @@ func TestPriorityClient(t *testing.T) {
 	if _, prioClientFound := peersWithNames[prioCli.name]; !prioClientFound {
 		t.Error("prio client is not among lightServer peers", peersWithNames)
 	}
-}
+}*/

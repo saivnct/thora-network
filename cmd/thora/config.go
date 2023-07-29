@@ -32,8 +32,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/scwallet"
 	"github.com/ethereum/go-ethereum/accounts/usbwallet"
 	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/eth/catalyst"
-	ethcatalyst "github.com/ethereum/go-ethereum/eth/catalyst"
 	"github.com/ethereum/go-ethereum/eth/downloader"
 	"github.com/ethereum/go-ethereum/eth/ethconfig"
 	"github.com/ethereum/go-ethereum/internal/ethapi"
@@ -196,6 +194,7 @@ func makeFullNode(ctx *cli.Context) (*node.Node, ethapi.Backend) {
 		utils.RegisterFullSyncTester(stack, eth, ctx.Path(utils.SyncTargetFlag.Name))
 	}
 
+	/* Giangbb: Disable catalyst
 	// Start the dev mode if requested, or launch the engine API for
 	// interacting with external consensus client.
 	if ctx.IsSet(utils.DeveloperFlag.Name) {
@@ -211,6 +210,7 @@ func makeFullNode(ctx *cli.Context) (*node.Node, ethapi.Backend) {
 			utils.Fatalf("failed to register catalyst service: %v", err)
 		}
 	}
+	*/
 	return stack, backend
 }
 
