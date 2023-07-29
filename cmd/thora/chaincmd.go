@@ -205,7 +205,7 @@ func initGenesis(ctx *cli.Context) error {
 		}
 		chaindb.Close()
 		log.Info("Successfully wrote genesis state", "database", name, "hash", hash)
-		log.Info("Genesis hash %v\n", hash)
+		//fmt.Printf("Genesis hash %v\n", hash)
 	}
 	return nil
 }
