@@ -701,7 +701,16 @@ func (srv *Server) doPeerOp(fn peerOpFunc) {
 
 // run is the main loop of the server.
 func (srv *Server) run() {
-	srv.log.Info("Started P2P networking", "self", srv.localnode.Node().URLv4())
+
+	//GIANGBB TEST
+	node := srv.localnode.Node()
+	srv.log.Info("Started P2P networking", "self", node.URLv4())
+	var thoraVersion string
+	node.Record().Load(enr.WithEntry("thora", &thoraVersion))
+	srv.log.Info("Started P2P networking", "self", node.String())
+	fmt.Printf("thoraVersion: %v\n", thoraVersion)
+	fmt.Printf("Seq: %v\n", node.Seq())
+
 	defer srv.loopWG.Done()
 	defer srv.nodedb.Close()
 	defer srv.discmix.Close()

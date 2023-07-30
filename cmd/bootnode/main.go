@@ -21,6 +21,7 @@ import (
 	"crypto/ecdsa"
 	"flag"
 	"fmt"
+	"github.com/ethereum/go-ethereum/p2p/enr"
 	"net"
 	"os"
 	"time"
@@ -119,6 +120,13 @@ func main() {
 			listenerAddr = natAddr
 		}
 	}
+
+	//GIANGBB TEST
+	node := ln.Node()
+	fmt.Printf("ENR: %v\n", node.String())
+	var thoraVersion string
+	node.Record().Load(enr.WithEntry("thora", &thoraVersion))
+	fmt.Printf("thoraVersion: %v\n", thoraVersion)
 
 	printNotice(&nodeKey.PublicKey, *listenerAddr)
 	cfg := discover.Config{

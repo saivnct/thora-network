@@ -83,6 +83,10 @@ func NewLocalNode(db *DB, key *ecdsa.PrivateKey) *LocalNode {
 	ln.seq = db.localSeq(ln.id)
 	ln.update = time.Now()
 	ln.cur.Store((*Node)(nil))
+
+	//GIANGBB TEST
+	ln.entries["thora"] = enr.WithEntry("thora", "123")
+
 	return ln
 }
 
@@ -306,6 +310,7 @@ func (ln *LocalNode) sign() {
 	}
 	ln.bumpSeq()
 	r.SetSeq(ln.seq)
+
 	if err := SignV4(&r, ln.key); err != nil {
 		panic(fmt.Errorf("enode: can't sign record: %v", err))
 	}

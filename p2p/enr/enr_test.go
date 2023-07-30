@@ -108,6 +108,30 @@ func TestLoadErrors(t *testing.T) {
 	}
 }
 
+// TestGetSetCustom - GIANGBB TEST
+func TestGetSetCustom(t *testing.T) {
+	var r Record
+	r.Set(WithEntry("hello", "world"))
+	r.Set(WithEntry("test", uint32(223)))
+
+	var v1 string
+	var v2 uint32
+
+	r.Load(WithEntry("hello", &v1))
+	r.Load(WithEntry("test", &v2))
+
+	var v3 uint32
+	var v4 string
+	r.Load(WithEntry("test2", &v3))
+	r.Load(WithEntry("test2", &v4))
+
+	assert.Equal(t, v1, "world")
+	assert.Equal(t, v2, uint32(223))
+	assert.Equal(t, v3, uint32(0))
+	assert.Equal(t, v4, "")
+
+}
+
 // TestSortedGetAndSet tests that Set produced a sorted pairs slice.
 func TestSortedGetAndSet(t *testing.T) {
 	type pair struct {
