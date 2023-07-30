@@ -415,7 +415,7 @@ func (s *Ethereum) ValidateBeforeMining() (bool, error) {
 		return cli.IsCurrentValidator(eb, s.blockchain)
 	}
 
-	return true, nil
+	return false, errors.New("not support POW mining")
 }
 
 // StartMining starts the miner with the given number of CPU threads. If mining

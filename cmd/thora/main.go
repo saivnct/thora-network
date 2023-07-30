@@ -417,7 +417,7 @@ func startNode(ctx *cli.Context, stack *node.Node, backend ethapi.Backend, isCon
 		}
 		ethBackend, ok := backend.(*eth.EthAPIBackend)
 		if !ok {
-			utils.Fatalf("Ethereum service not running")
+			utils.Fatalf("%v service not running", params.PlatformChainInfo.PlatformShortName)
 		}
 
 		// Check if node has mining permissions
