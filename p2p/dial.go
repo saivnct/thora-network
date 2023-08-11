@@ -22,6 +22,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/p2p/enr"
+	"github.com/ethereum/go-ethereum/params"
 	mrand "math/rand"
 	"net"
 	"sync"
@@ -73,12 +75,13 @@ func nodeAddr(n *enode.Node) net.Addr {
 
 // checkDial errors:
 var (
-	errSelf             = errors.New("is self")
-	errAlreadyDialing   = errors.New("already dialing")
-	errAlreadyConnected = errors.New("already connected")
-	errRecentlyDialed   = errors.New("recently dialed")
-	errNetRestrict      = errors.New("not contained in netrestrict list")
-	errNoPort           = errors.New("node does not provide TCP port")
+	errSelf                    = errors.New("is self")
+	errAlreadyDialing          = errors.New("already dialing")
+	errAlreadyConnected        = errors.New("already connected")
+	errRecentlyDialed          = errors.New("recently dialed")
+	errNetRestrict             = errors.New("not contained in netrestrict list")
+	errNoPort                  = errors.New("node does not provide TCP port")
+	errPlatformProtocolVersion = errors.New("not matching platform protocol version")
 )
 
 // dialer creates outbound connections and submits them into Server.
@@ -381,6 +384,13 @@ func (d *dialScheduler) checkDial(n *enode.Node) error {
 		// node and the actual endpoint will be resolved later in dialTask.
 		return errNoPort
 	}
+
+	var enrPlatformProtocolVersion string
+	n.Record().Load(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, &enrPlatformProtocolVersion))
+	if enrPlatformProtocolVersion != params.PlatformChainInfo.ENRPlatformProtocolVersion {
+		return errPlatformProtocolVersion
+	}
+
 	if _, ok := d.dialing[n.ID()]; ok {
 		return errAlreadyDialing
 	}

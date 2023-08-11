@@ -20,6 +20,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"math/rand"
 	"net"
 	"reflect"
@@ -82,6 +83,10 @@ func newNode(id enode.ID, addr string) *enode.Node {
 		}
 		r.Set(enr.IP(ip))
 	}
+
+	//GIANGBB - Adding Platform protocol branding to local node
+	r.Set(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, params.PlatformChainInfo.ENRPlatformProtocolVersion))
+
 	return enode.SignNull(&r, id)
 }
 

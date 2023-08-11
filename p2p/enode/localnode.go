@@ -19,6 +19,7 @@ package enode
 import (
 	"crypto/ecdsa"
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"net"
 	"reflect"
 	"strconv"
@@ -84,8 +85,8 @@ func NewLocalNode(db *DB, key *ecdsa.PrivateKey) *LocalNode {
 	ln.update = time.Now()
 	ln.cur.Store((*Node)(nil))
 
-	//GIANGBB TEST
-	ln.entries["thora"] = enr.WithEntry("thora", "123")
+	//GIANGBB - Adding Platform protocol branding to local node
+	ln.entries[params.PlatformChainInfo.ENRPlatformProtocolName] = enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, params.PlatformChainInfo.ENRPlatformProtocolVersion)
 
 	return ln
 }

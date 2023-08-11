@@ -150,7 +150,11 @@ func TestServerDial(t *testing.T) {
 
 	// tell the server to connect
 	tcpAddr := listener.Addr().(*net.TCPAddr)
-	node := enode.NewV4(remid, tcpAddr.IP, tcpAddr.Port, 0)
+
+	//node := enode.NewV4(remid, tcpAddr.IP, tcpAddr.Port, 0)
+	//GIANGBB - Adding Platform protocol branding to local node
+	node := enode.NewV4WithPlatformVer(remid, tcpAddr.IP, tcpAddr.Port, 0)
+
 	srv.AddPeer(node)
 
 	select {

@@ -19,6 +19,7 @@ package discover
 import (
 	"crypto/ecdsa"
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"math/rand"
 
 	"net"
@@ -351,6 +352,10 @@ func TestTable_revalidateSyncRecord(t *testing.T) {
 
 	// Update the node record.
 	r.Set(enr.WithEntry("foo", "bar"))
+
+	//GIANGBB - Adding Platform protocol branding to local node
+	r.Set(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, params.PlatformChainInfo.ENRPlatformProtocolVersion))
+
 	n2 := enode.SignNull(&r, id)
 	transport.updateRecord(n2)
 

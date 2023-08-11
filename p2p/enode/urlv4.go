@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"net"
 	"net/url"
 	"regexp"
@@ -93,6 +94,31 @@ func NewV4(pubkey *ecdsa.PublicKey, ip net.IP, tcp, udp int) *Node {
 	if tcp != 0 {
 		r.Set(enr.TCP(tcp))
 	}
+	signV4Compat(&r, pubkey)
+	n, err := New(v4CompatID{}, &r)
+	if err != nil {
+		panic(err)
+	}
+	return n
+}
+
+// NewV4WithPlatformVer creates a node from discovery v4 node information. The record
+// contained in the node has a zero-length signature. This is only for test case
+// GIANGBB - Adding Platform protocol branding to local node
+func NewV4WithPlatformVer(pubkey *ecdsa.PublicKey, ip net.IP, tcp, udp int) *Node {
+	var r enr.Record
+	if len(ip) > 0 {
+		r.Set(enr.IP(ip))
+	}
+	if udp != 0 {
+		r.Set(enr.UDP(udp))
+	}
+	if tcp != 0 {
+		r.Set(enr.TCP(tcp))
+	}
+
+	r.Set(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, params.PlatformChainInfo.ENRPlatformProtocolVersion))
+
 	signV4Compat(&r, pubkey)
 	n, err := New(v4CompatID{}, &r)
 	if err != nil {

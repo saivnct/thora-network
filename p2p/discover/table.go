@@ -26,6 +26,8 @@ import (
 	crand "crypto/rand"
 	"encoding/binary"
 	"fmt"
+	"github.com/ethereum/go-ethereum/p2p/enr"
+	"github.com/ethereum/go-ethereum/params"
 	mrand "math/rand"
 	"net"
 	"sort"
@@ -350,13 +352,22 @@ func (tab *Table) doRevalidate(done chan<- struct{}) {
 	// Ping the selected node and wait for a pong.
 	remoteSeq, err := tab.net.ping(unwrapNode(last))
 
-	// Also fetch record if the node replied and returned a higher sequence number.
-	if last.Seq() < remoteSeq {
-		n, err := tab.net.RequestENR(unwrapNode(last))
-		if err != nil {
-			tab.log.Debug("ENR request failed", "id", last.ID(), "addr", last.addr(), "err", err)
-		} else {
-			last = &node{Node: *n, addedAt: last.addedAt, livenessChecks: last.livenessChecks}
+	if err == nil {
+		// Also fetch record if the node replied and returned a higher sequence number.
+		if last.Seq() < remoteSeq {
+			n, ernErr := tab.net.RequestENR(unwrapNode(last))
+			if ernErr != nil {
+				//tab.log.Debug("ENR request failed", "id", last.ID(), "addr", last.addr(), "err", ernErr)
+				err = ernErr
+			} else {
+				var enrPlatformProtocolVersion string
+				n.Record().Load(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, &enrPlatformProtocolVersion))
+				if enrPlatformProtocolVersion != params.PlatformChainInfo.ENRPlatformProtocolVersion {
+					err = errPlatformProtocolVersion
+				} else {
+					last = &node{Node: *n, addedAt: last.addedAt, livenessChecks: last.livenessChecks}
+				}
+			}
 		}
 	}
 

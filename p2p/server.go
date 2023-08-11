@@ -23,6 +23,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"net"
 	"sync"
 	"sync/atomic"
@@ -705,11 +706,12 @@ func (srv *Server) run() {
 	//GIANGBB TEST
 	node := srv.localnode.Node()
 	srv.log.Info("Started P2P networking", "self", node.URLv4())
-	var thoraVersion string
-	node.Record().Load(enr.WithEntry("thora", &thoraVersion))
 	srv.log.Info("Started P2P networking", "self", node.String())
-	fmt.Printf("thoraVersion: %v\n", thoraVersion)
-	fmt.Printf("Seq: %v\n", node.Seq())
+	srv.log.Info("Started P2P networking", "self", node.IP())
+
+	var enrPlatformProtocolVersion string
+	node.Record().Load(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, &enrPlatformProtocolVersion))
+	srv.log.Debug("Started P2P networking", "ENRPlatformProtocolVersion", enrPlatformProtocolVersion, "Seq", node.Seq())
 
 	defer srv.loopWG.Done()
 	defer srv.nodedb.Close()

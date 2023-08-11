@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/ethereum/go-ethereum/p2p/enr"
+	"github.com/ethereum/go-ethereum/params"
 	"net"
 	"os"
 	"time"
@@ -121,12 +122,12 @@ func main() {
 		}
 	}
 
-	//GIANGBB TEST
+	//GIANGBB - Adding Platform protocol branding to local node
 	node := ln.Node()
-	fmt.Printf("ENR: %v\n", node.String())
-	var thoraVersion string
-	node.Record().Load(enr.WithEntry("thora", &thoraVersion))
-	fmt.Printf("thoraVersion: %v\n", thoraVersion)
+	var enrPlatformProtocolVersion string
+	node.Record().Load(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, &enrPlatformProtocolVersion))
+	fmt.Println(node.String())
+	fmt.Printf("ENRPlatformProtocolVersion: %v\n", enrPlatformProtocolVersion)
 
 	printNotice(&nodeKey.PublicKey, *listenerAddr)
 	cfg := discover.Config{
