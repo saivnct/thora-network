@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/ethereum/go-ethereum/params"
 	"net"
 	"os"
 	"strconv"
@@ -306,6 +307,8 @@ func (n *NodeConfig) initEnode(ip net.IP, tcpport int, udpport int) error {
 	n.Record.Set(&enrTcpPort)
 	enrUdpPort := enr.UDP(udpport)
 	n.Record.Set(&enrUdpPort)
+
+	n.Record.Set(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, params.PlatformChainInfo.ENRPlatformProtocolVersion))
 
 	err := enode.SignV4(&n.Record, n.PrivateKey)
 	if err != nil {
