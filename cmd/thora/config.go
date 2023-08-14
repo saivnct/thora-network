@@ -20,6 +20,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/eth/catalyst"
 	"os"
 	"reflect"
 	"unicode"
@@ -194,7 +195,6 @@ func makeFullNode(ctx *cli.Context) (*node.Node, ethapi.Backend) {
 		utils.RegisterFullSyncTester(stack, eth, ctx.Path(utils.SyncTargetFlag.Name))
 	}
 
-	/* Giangbb: Disable catalyst
 	// Start the dev mode if requested, or launch the engine API for
 	// interacting with external consensus client.
 	if ctx.IsSet(utils.DeveloperFlag.Name) {
@@ -204,7 +204,9 @@ func makeFullNode(ctx *cli.Context) (*node.Node, ethapi.Backend) {
 		}
 		catalyst.RegisterSimulatedBeaconAPIs(stack, simBeacon)
 		stack.RegisterLifecycle(simBeacon)
-	} else if cfg.Eth.SyncMode != downloader.LightSync {
+	}
+	/* Giangbb: Disable catalyst
+	else if cfg.Eth.SyncMode != downloader.LightSync {
 		err := ethcatalyst.Register(stack, eth)
 		if err != nil {
 			utils.Fatalf("failed to register catalyst service: %v", err)
