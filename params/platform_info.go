@@ -13,8 +13,9 @@ var PlatformChainInfo = struct {
 	GETHCmd                    string
 	IPCPath                    string
 
-	ENRPlatformProtocolName    string
-	ENRPlatformProtocolVersion string
+	ENRPlatformProtocolNetworkOnly bool
+	ENRPlatformProtocolName        string
+	ENRPlatformProtocolVersion     string
 
 	TestPlatformName               string
 	TestPlatformShortName          string
@@ -27,8 +28,9 @@ var PlatformChainInfo = struct {
 	GETHCmd:                    "thora", //must be same with geth/main.go => clientIdentifier
 	IPCPath:                    "thora.ipc",
 
-	ENRPlatformProtocolName:    "thora",
-	ENRPlatformProtocolVersion: "v1.0.0",
+	ENRPlatformProtocolNetworkOnly: true,
+	ENRPlatformProtocolName:        "thora",
+	ENRPlatformProtocolVersion:     "v1.0.0",
 
 	TestPlatformName:               "Oda Test Network",
 	TestPlatformShortName:          "Oda",

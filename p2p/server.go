@@ -707,7 +707,7 @@ func (srv *Server) run() {
 	node := srv.localnode.Node()
 	srv.log.Info("Started P2P networking", "self", node.URLv4())
 	srv.log.Info("Started P2P networking", "self", node.String())
-	srv.log.Info("Started P2P networking", "self", node.IP())
+	srv.log.Info("Started P2P networking", "self", node.ID(), "IP", node.IP(), "TCP", node.TCP(), "UDP", node.UDP())
 
 	var enrPlatformProtocolVersion string
 	node.Record().Load(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, &enrPlatformProtocolVersion))

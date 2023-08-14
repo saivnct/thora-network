@@ -385,10 +385,12 @@ func (d *dialScheduler) checkDial(n *enode.Node) error {
 		return errNoPort
 	}
 
-	var enrPlatformProtocolVersion string
-	n.Record().Load(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, &enrPlatformProtocolVersion))
-	if enrPlatformProtocolVersion != params.PlatformChainInfo.ENRPlatformProtocolVersion {
-		return errPlatformProtocolVersion
+	if params.PlatformChainInfo.ENRPlatformProtocolNetworkOnly {
+		var enrPlatformProtocolVersion string
+		n.Record().Load(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, &enrPlatformProtocolVersion))
+		if enrPlatformProtocolVersion != params.PlatformChainInfo.ENRPlatformProtocolVersion {
+			return errPlatformProtocolVersion
+		}
 	}
 
 	if _, ok := d.dialing[n.ID()]; ok {

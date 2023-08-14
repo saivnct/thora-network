@@ -352,21 +352,33 @@ func (tab *Table) doRevalidate(done chan<- struct{}) {
 	// Ping the selected node and wait for a pong.
 	remoteSeq, err := tab.net.ping(unwrapNode(last))
 
-	if err == nil {
+	if params.PlatformChainInfo.ENRPlatformProtocolNetworkOnly {
+		if err == nil {
+			// Also fetch record if the node replied and returned a higher sequence number.
+			if last.Seq() < remoteSeq {
+				n, ernErr := tab.net.RequestENR(unwrapNode(last))
+				if ernErr != nil {
+					//tab.log.Debug("ENR request failed", "id", last.ID(), "addr", last.addr(), "err", ernErr)
+					err = ernErr
+				} else {
+					var enrPlatformProtocolVersion string
+					n.Record().Load(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, &enrPlatformProtocolVersion))
+					if enrPlatformProtocolVersion != params.PlatformChainInfo.ENRPlatformProtocolVersion {
+						err = errPlatformProtocolVersion
+					} else {
+						last = &node{Node: *n, addedAt: last.addedAt, livenessChecks: last.livenessChecks}
+					}
+				}
+			}
+		}
+	} else {
 		// Also fetch record if the node replied and returned a higher sequence number.
 		if last.Seq() < remoteSeq {
-			n, ernErr := tab.net.RequestENR(unwrapNode(last))
-			if ernErr != nil {
-				//tab.log.Debug("ENR request failed", "id", last.ID(), "addr", last.addr(), "err", ernErr)
-				err = ernErr
+			n, err := tab.net.RequestENR(unwrapNode(last))
+			if err != nil {
+				tab.log.Trace("ENR request failed", "id", last.ID(), "addr", last.addr(), "err", err)
 			} else {
-				var enrPlatformProtocolVersion string
-				n.Record().Load(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, &enrPlatformProtocolVersion))
-				if enrPlatformProtocolVersion != params.PlatformChainInfo.ENRPlatformProtocolVersion {
-					err = errPlatformProtocolVersion
-				} else {
-					last = &node{Node: *n, addedAt: last.addedAt, livenessChecks: last.livenessChecks}
-				}
+				last = &node{Node: *n, addedAt: last.addedAt, livenessChecks: last.livenessChecks}
 			}
 		}
 	}
