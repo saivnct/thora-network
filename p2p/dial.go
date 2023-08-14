@@ -75,13 +75,12 @@ func nodeAddr(n *enode.Node) net.Addr {
 
 // checkDial errors:
 var (
-	errSelf                    = errors.New("is self")
-	errAlreadyDialing          = errors.New("already dialing")
-	errAlreadyConnected        = errors.New("already connected")
-	errRecentlyDialed          = errors.New("recently dialed")
-	errNetRestrict             = errors.New("not contained in netrestrict list")
-	errNoPort                  = errors.New("node does not provide TCP port")
-	errPlatformProtocolVersion = errors.New("not matching platform protocol version")
+	errSelf             = errors.New("is self")
+	errAlreadyDialing   = errors.New("already dialing")
+	errAlreadyConnected = errors.New("already connected")
+	errRecentlyDialed   = errors.New("recently dialed")
+	errNetRestrict      = errors.New("not contained in netrestrict list")
+	errNoPort           = errors.New("node does not provide TCP port")
 )
 
 // dialer creates outbound connections and submits them into Server.
@@ -247,6 +246,15 @@ loop:
 			if err := d.checkDial(node); err != nil {
 				d.log.Trace("Discarding dial candidate", "id", node.ID(), "ip", node.IP(), "reason", err)
 			} else {
+				if params.PlatformChainInfo.ENRPlatformProtocolNetworkOnly {
+					var enrPlatformProtocolVersion string
+					node.Record().Load(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, &enrPlatformProtocolVersion))
+					if enrPlatformProtocolVersion != params.PlatformChainInfo.ENRPlatformProtocolVersion {
+						d.log.Debug("Discarding dial candidate", "id", node.ID(), "ip", node.IP(), "reason", "not matching platform protocol version")
+						continue loop
+					}
+				}
+
 				d.startDial(newDialTask(node, dynDialedConn))
 			}
 
@@ -384,15 +392,6 @@ func (d *dialScheduler) checkDial(n *enode.Node) error {
 		// node and the actual endpoint will be resolved later in dialTask.
 		return errNoPort
 	}
-
-	if params.PlatformChainInfo.ENRPlatformProtocolNetworkOnly {
-		var enrPlatformProtocolVersion string
-		n.Record().Load(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, &enrPlatformProtocolVersion))
-		if enrPlatformProtocolVersion != params.PlatformChainInfo.ENRPlatformProtocolVersion {
-			return errPlatformProtocolVersion
-		}
-	}
-
 	if _, ok := d.dialing[n.ID()]; ok {
 		return errAlreadyDialing
 	}
