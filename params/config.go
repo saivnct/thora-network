@@ -30,7 +30,7 @@ var (
 	//GoerliGenesisHash = common.HexToHash("0xbf7e331f7f7c1dd2e05159666b3bf8bc7a8a3a9eb1d518969eab529dd9b88c1a")
 
 	PlatformMainNetGenesisHash = common.HexToHash("0x60feb258a4dc05860f315e680435a82523d0987a599c7817131a2f732b1037ad")
-	PlatformTestNetGenesisHash = common.HexToHash("0xf5dd8ba3d1a0b90a157c3692adca2709afea80a261f45c0a534f60d0f4865181")
+	PlatformTestNetGenesisHash = common.HexToHash("0xbfaa3b2b4ba6d035d1532d4e658896aaba2073498603e7c712e486e11f52af83")
 )
 
 func newUint64(val uint64) *uint64 { return &val }
