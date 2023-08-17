@@ -3,7 +3,7 @@ ARG COMMIT=""
 ARG VERSION=""
 ARG BUILDNUM=""
 
-# Build Geth in a stock Go builder container
+# Build Thora in a stock Go builder container
 FROM golang:1.20-alpine as builder
 
 RUN apk add --no-cache gcc musl-dev linux-headers git
@@ -16,7 +16,7 @@ RUN cd /thora-network && go mod download
 ADD . /thora-network
 RUN cd /thora-network && go run build/ci.go install -static ./cmd/thora
 
-# Pull Geth into a second stage deploy alpine container
+# Pull Thora into a second stage deploy alpine contaidner
 FROM alpine:latest
 
 RUN apk add --no-cache ca-certificates
