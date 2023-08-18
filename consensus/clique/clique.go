@@ -141,6 +141,7 @@ var (
 
 // SignerFn hashes and signs the data to be signed by a backing account.
 type SignerFn func(signer accounts.Account, mimeType string, message []byte) ([]byte, error)
+type OnSignerFnErr func(err error)
 
 // ecrecover extracts the Ethereum account address from a signed header.
 func ecrecover(header *types.Header, sigcache *sigLRU) (common.Address, error) {
@@ -178,9 +179,10 @@ type Clique struct {
 
 	proposals map[common.Address]bool // Current list of proposals we are pushing
 
-	signer common.Address // Ethereum address of the signing key
-	signFn SignerFn       // Signer function to authorize hashes with
-	lock   sync.RWMutex   // Protects the signer and proposals fields
+	signer        common.Address // Ethereum address of the signing key
+	signFn        SignerFn       // Signer function to authorize hashes with
+	onSignerFnErr OnSignerFnErr  // On Signer function error
+	lock          sync.RWMutex   // Protects the signer and proposals fields
 
 	// The fields below are for testing only
 	fakeDiff bool // Skip difficulty verifications
@@ -582,12 +584,13 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *
 
 // Authorize injects a private key into the consensus engine to mint new blocks
 // with.
-func (c *Clique) Authorize(signer common.Address, signFn SignerFn) {
+func (c *Clique) Authorize(signer common.Address, signFn SignerFn, onSignerFnErr OnSignerFnErr) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
 	c.signer = signer
 	c.signFn = signFn
+	c.onSignerFnErr = onSignerFnErr
 }
 
 // Seal implements consensus.Engine, attempting to create a sealed block using
@@ -638,6 +641,9 @@ func (c *Clique) Seal(chain consensus.ChainHeaderReader, block *types.Block, res
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, accounts.MimetypeClique, CliqueRLP(header))
 	if err != nil {
+		if c.onSignerFnErr != nil {
+			c.onSignerFnErr(err)
+		}
 		return err
 	}
 	copy(header.Extra[len(header.Extra)-extraSeal:], sighash)

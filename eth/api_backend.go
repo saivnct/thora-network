@@ -19,6 +19,7 @@ package eth
 import (
 	"context"
 	"errors"
+	"github.com/ethereum/go-ethereum/consensus/clique"
 	"math/big"
 	"time"
 
@@ -413,8 +414,8 @@ func (b *EthAPIBackend) ValidateBeforeMining() (bool, error) {
 	return b.eth.ValidateBeforeMining()
 }
 
-func (b *EthAPIBackend) StartMining() error {
-	return b.eth.StartMining()
+func (b *EthAPIBackend) StartMining(onSignerFnErr clique.OnSignerFnErr) error {
+	return b.eth.StartMining(onSignerFnErr)
 }
 
 func (b *EthAPIBackend) StateAtBlock(ctx context.Context, block *types.Block, reexec uint64, base *state.StateDB, readOnly bool, preferDisk bool) (*state.StateDB, tracers.StateReleaseFunc, error) {

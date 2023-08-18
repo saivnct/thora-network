@@ -40,7 +40,7 @@ func NewMinerAPI(e *Ethereum) *MinerAPI {
 // number of threads allowed to use and updates the minimum price required by the
 // transaction pool.
 func (api *MinerAPI) Start() error {
-	return api.e.StartMining()
+	return api.e.StartMining(nil)
 }
 
 // Stop terminates the miner, both at the consensus engine level as well as at

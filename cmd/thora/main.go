@@ -411,6 +411,11 @@ func startNode(ctx *cli.Context, stack *node.Node, backend ethapi.Backend, isCon
 
 	// Start auxiliary services if enabled
 	if ctx.Bool(utils.MiningEnabledFlag.Name) {
+		onSignerFnErr := func(err error) {
+			log.Error("On SignFn Error", "err", err)
+			stack.Close()
+		}
+
 		// Mining only makes sense if a full Ethereum node is running
 		if ctx.String(utils.SyncModeFlag.Name) == "light" {
 			utils.Fatalf("Light clients do not support mining")
@@ -430,7 +435,7 @@ func startNode(ctx *cli.Context, stack *node.Node, backend ethapi.Backend, isCon
 		// Set the gas price to the limits from the CLI and start mining
 		gasprice := flags.GlobalBig(ctx, utils.MinerGasPriceFlag.Name)
 		ethBackend.TxPool().SetGasTip(gasprice)
-		if err := ethBackend.StartMining(); err != nil {
+		if err := ethBackend.StartMining(onSignerFnErr); err != nil {
 			utils.Fatalf("Failed to start mining: %v", err)
 		}
 	}
