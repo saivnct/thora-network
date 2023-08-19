@@ -421,7 +421,7 @@ func (s *Ethereum) ValidateBeforeMining() (bool, error) {
 // StartMining starts the miner with the given number of CPU threads. If mining
 // is already running, this method adjust the number of threads allowed to use
 // and updates the minimum price required by the transaction pool.
-func (s *Ethereum) StartMining(onSignerFnErr clique.OnSignerFnErr) error {
+func (s *Ethereum) StartMining(onCliqueSignerFnErr clique.OnSignerFnErr) error {
 	// If the miner was not running, initialize it
 	if !s.IsMining() {
 		// Propagate the initial price point to the transaction pool
@@ -450,7 +450,7 @@ func (s *Ethereum) StartMining(onSignerFnErr clique.OnSignerFnErr) error {
 				log.Error("Etherbase account unavailable locally", "err", err)
 				return fmt.Errorf("signer missing: %v", err)
 			}
-			cli.Authorize(eb, wallet.SignData, onSignerFnErr)
+			cli.Authorize(eb, wallet.SignData, onCliqueSignerFnErr)
 		}
 		// If mining is started, we can disable the transaction rejection mechanism
 		// introduced to speed sync times.

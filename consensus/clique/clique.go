@@ -609,7 +609,7 @@ func (c *Clique) Seal(chain consensus.ChainHeaderReader, block *types.Block, res
 	}
 	// Don't hold the signer fields for the entire sealing procedure
 	c.lock.RLock()
-	signer, signFn := c.signer, c.signFn
+	signer, signFn, onSignerFnErr := c.signer, c.signFn, c.onSignerFnErr
 	c.lock.RUnlock()
 
 	// Bail out if we're unauthorized to sign a block
@@ -641,8 +641,8 @@ func (c *Clique) Seal(chain consensus.ChainHeaderReader, block *types.Block, res
 	// Sign all the things!
 	sighash, err := signFn(accounts.Account{Address: signer}, accounts.MimetypeClique, CliqueRLP(header))
 	if err != nil {
-		if c.onSignerFnErr != nil {
-			c.onSignerFnErr(err)
+		if onSignerFnErr != nil {
+			go onSignerFnErr(err)
 		}
 		return err
 	}
