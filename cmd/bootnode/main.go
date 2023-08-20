@@ -128,6 +128,7 @@ func main() {
 	node.Record().Load(enr.WithEntry(params.PlatformChainInfo.ENRPlatformProtocolName, &enrPlatformProtocolVersion))
 	fmt.Println(node.String())
 	fmt.Printf("ENRPlatformProtocolVersion: %v\n", enrPlatformProtocolVersion)
+	fmt.Printf("node ID: %v\n", node.ID().String())
 
 	printNotice(&nodeKey.PublicKey, *listenerAddr)
 	cfg := discover.Config{

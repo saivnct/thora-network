@@ -393,6 +393,9 @@ func (tab *Table) doRevalidate(done chan<- struct{}) {
 		tab.bumpInBucket(b, last)
 		return
 	}
+
+	tab.log.Trace("Revalidated node failed", "b", bi, "id", last.ID(), "addr", last.addr(), "err", err)
+
 	// No reply received, pick a replacement or delete the node if there aren't
 	// any replacements.
 	if r := tab.replace(b, last); r != nil {
