@@ -109,11 +109,11 @@ func TestCreation(t *testing.T) {
 			params.PlatformMainnetChainConfig,
 			params.PlatformMainNetGenesisHash,
 			[]testcase{
-				{0, 0, ID{Hash: checksumToBytes(0x6adb4d60), Next: 0}},                // Unsynced, last Frontier, Homestead, Tangerine, Spurious, Byzantium, Constantinople, Petersburg, Istanbul, Berlin and first London block
-				{1735370, 0, ID{Hash: checksumToBytes(0x6adb4d60), Next: 0}},          // Last London block
-				{1735371, 0, ID{Hash: checksumToBytes(0x6adb4d60), Next: 0}},          // First MergeNetsplit block
-				{1735372, 1677557087, ID{Hash: checksumToBytes(0x6adb4d60), Next: 0}}, // Last MergeNetsplit block
-				{1735372, 1677557088, ID{Hash: checksumToBytes(0x6adb4d60), Next: 0}}, // First Shanghai block
+				{0, 0, ID{Hash: checksumToBytes(0x8b027e22), Next: 0}},                // Unsynced, last Frontier, Homestead, Tangerine, Spurious, Byzantium, Constantinople, Petersburg, Istanbul, Berlin and first London block
+				{1735370, 0, ID{Hash: checksumToBytes(0x8b027e22), Next: 0}},          // Last London block
+				{1735371, 0, ID{Hash: checksumToBytes(0x8b027e22), Next: 0}},          // First MergeNetsplit block
+				{1735372, 1677557087, ID{Hash: checksumToBytes(0x8b027e22), Next: 0}}, // Last MergeNetsplit block
+				{1735372, 1677557088, ID{Hash: checksumToBytes(0x8b027e22), Next: 0}}, // First Shanghai block
 			},
 		},
 		// Platform Testnet test cases
@@ -121,11 +121,11 @@ func TestCreation(t *testing.T) {
 			params.PlatformTestnetChainConfig,
 			params.PlatformTestNetGenesisHash,
 			[]testcase{
-				{0, 0, ID{Hash: checksumToBytes(0xf33bd73d), Next: 0}},                // Unsynced, last Frontier, Homestead, Tangerine, Spurious, Byzantium, Constantinople, Petersburg, Istanbul, Berlin and first London block
-				{1735370, 0, ID{Hash: checksumToBytes(0xf33bd73d), Next: 0}},          // Last London block
-				{1735371, 0, ID{Hash: checksumToBytes(0xf33bd73d), Next: 0}},          // First MergeNetsplit block
-				{1735372, 1677557087, ID{Hash: checksumToBytes(0xf33bd73d), Next: 0}}, // Last MergeNetsplit block
-				{1735372, 1677557088, ID{Hash: checksumToBytes(0xf33bd73d), Next: 0}}, // First Shanghai block
+				{0, 0, ID{Hash: checksumToBytes(0xedddd61a), Next: 0}},                // Unsynced, last Frontier, Homestead, Tangerine, Spurious, Byzantium, Constantinople, Petersburg, Istanbul, Berlin and first London block
+				{1735370, 0, ID{Hash: checksumToBytes(0xedddd61a), Next: 0}},          // Last London block
+				{1735371, 0, ID{Hash: checksumToBytes(0xedddd61a), Next: 0}},          // First MergeNetsplit block
+				{1735372, 1677557087, ID{Hash: checksumToBytes(0xedddd61a), Next: 0}}, // Last MergeNetsplit block
+				{1735372, 1677557088, ID{Hash: checksumToBytes(0xedddd61a), Next: 0}}, // First Shanghai block
 			},
 		},
 	}

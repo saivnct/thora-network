@@ -29,8 +29,8 @@ var (
 	//SepoliaGenesisHash = common.HexToHash("0x25a5cc106eea7138acab33231d7160d69cb777ee0c2c553fcddf5138993e6dd9")
 	//GoerliGenesisHash = common.HexToHash("0xbf7e331f7f7c1dd2e05159666b3bf8bc7a8a3a9eb1d518969eab529dd9b88c1a")
 
-	PlatformMainNetGenesisHash = common.HexToHash("0x60feb258a4dc05860f315e680435a82523d0987a599c7817131a2f732b1037ad")
-	PlatformTestNetGenesisHash = common.HexToHash("0xbfaa3b2b4ba6d035d1532d4e658896aaba2073498603e7c712e486e11f52af83")
+	PlatformMainNetGenesisHash = common.HexToHash("0x1ef3885a04aa216fa8cd49874c8f5e5be2ab299356024c1281fd6bb9f80ad599")
+	PlatformTestNetGenesisHash = common.HexToHash("0xb959e4cd20d1e5987e78d967eae959fd2d7a5e4ebeb77e6f3bb2e7eddf39d79a")
 )
 
 func newUint64(val uint64) *uint64 { return &val }
@@ -63,7 +63,7 @@ var (
 		TerminalTotalDifficulty:       nil,
 		TerminalTotalDifficultyPassed: false,
 		Ethash:                        nil,
-		Clique:                        &CliqueConfig{Period: 5, Epoch: 30000},
+		Clique:                        &CliqueConfig{Period: 9, Epoch: 30000},
 	}
 
 	// PlatformTestnetChainConfig contains the chain parameters to run a node on the Platform test network.
@@ -92,7 +92,7 @@ var (
 		TerminalTotalDifficulty:       nil,
 		TerminalTotalDifficultyPassed: false,
 		Ethash:                        nil,
-		Clique:                        &CliqueConfig{Period: 5, Epoch: 30000},
+		Clique:                        &CliqueConfig{Period: 9, Epoch: 30000},
 	}
 
 	MainnetTerminalTotalDifficulty, _ = new(big.Int).SetString("58_750_000_000_000_000_000_000", 0)
