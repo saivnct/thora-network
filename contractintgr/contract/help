@@ -1,0 +1,33 @@
+go run main.go /Users/giangbb/giangbb/workspace/golang/geth/thora-playground/thora-playground-oda/genesis-test.json
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+thora init --datadir node1 genesis-test.json
+
+
+clef --keystore node1/keystore --configdir node1/clef --chainid 696969 --suppress-bootwarn --rules rules.js --http --http.addr 0.0.0.0
+
+thora --networkid 707070 --nat extip:10.61.60.41 --nodekey node1/nodekey --config node1-oda-config.toml --signer node1/clef/clef.ipc --miner.coinbase 0xf202ae205bBF80148a8c615670eBEF9ec63191f9 --mine
+
+
+thora attach node1/thora.ipc
+eth.blockNumber
+web3.fromWei(eth.getBalance('0xeD19d9CE7392A7f2262a67817E0DBAF68dF042b8'), 'ether');
+
+
+
