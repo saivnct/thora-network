@@ -20,7 +20,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/contractintgr"
 	"github.com/ethereum/go-ethereum/params"
+	"math/big"
 	"os"
 	"runtime"
 	"strconv"
@@ -187,6 +189,17 @@ func initGenesis(ctx *cli.Context) error {
 	if err := json.NewDecoder(file).Decode(genesis); err != nil {
 		utils.Fatalf("invalid genesis file: %v", err)
 	}
+
+	code, storage, err := contractintgr.DeploySMC()
+	if err != nil {
+		utils.Fatalf("failed to create Genesis SMC Account: %v", err)
+	}
+	genesis.Alloc[common.HexToAddress(common.MasterSMC)] = core.GenesisAccount{
+		Balance: big.NewInt(0),
+		Code:    code,
+		Storage: storage,
+	}
+
 	// Open and initialise both full and light databases
 	stack, _ := makeConfigNode(ctx)
 	defer stack.Close()
@@ -205,7 +218,7 @@ func initGenesis(ctx *cli.Context) error {
 		}
 		chaindb.Close()
 		log.Info("Successfully wrote genesis state", "database", name, "hash", hash)
-		//fmt.Printf("Genesis hash %v\n", hash)
+		fmt.Printf("Genesis hash %v\n", hash)
 	}
 	return nil
 }
