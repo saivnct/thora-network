@@ -12,23 +12,24 @@ import (
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
+	"log"
 	"math/big"
 	"time"
 )
 
-func DecodePreAlloc(data string) (core.GenesisAlloc, error) {
+func DecodePreAlloc(data string) core.GenesisAlloc {
 	byteData, err := hexutil.Decode(data)
 	if err != nil {
-		return nil, err
+		log.Fatalf("Failed to DecodePreAlloc %v", err)
 	}
 
 	g := core.GenesisAlloc{}
 	err = json.Unmarshal(byteData, &g)
 	if err != nil {
-		return nil, err
+		log.Fatalf("Failed to DecodePreAlloc %v", err)
 	}
 
-	return g, nil
+	return g
 }
 
 func DeploySMC() ([]byte, map[common.Hash]common.Hash, error) {
@@ -72,7 +73,7 @@ func DeploySMC() ([]byte, map[common.Hash]common.Hash, error) {
 		trim := bytes.TrimLeft(val.Bytes(), "\x00")
 		rlp.DecodeBytes(trim, &decode)
 		storage[key] = common.BytesToHash(decode)
-		//log.Printf("DecodeBytes: key %v, value %v -  decode %v\n", key.String(), val.String(), storage[key].String())
+		log.Printf("DecodeBytes: key %v, value %v -  decode %v\n", key.String(), val.String(), storage[key].String())
 		return true
 	}
 	contractBackend.ForEachStorageAt(ctx, erc20Address, nil, f)

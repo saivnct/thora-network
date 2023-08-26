@@ -605,7 +605,7 @@ func DefaultTestnetGenesisBlock() *Genesis {
 		ExtraData:  hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000000f202ae205bBF80148a8c615670eBEF9ec63191f90000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
 		GasLimit:   30000000,
 		Difficulty: big.NewInt(1),
-		Alloc:      decodePrealloc(platformTestnetAllocData),
+		Alloc:      decodePreAlloc(platformTestnetAllocData),
 	}
 }
 
@@ -645,4 +645,19 @@ func decodePrealloc(data string) GenesisAlloc {
 		ga[common.BigToAddress(account.Addr)] = GenesisAccount{Balance: account.Balance}
 	}
 	return ga
+}
+
+func decodePreAlloc(data string) GenesisAlloc {
+	byteData, err := hexutil.Decode(data)
+	if err != nil {
+		panic(err)
+	}
+
+	g := GenesisAlloc{}
+	err = json.Unmarshal(byteData, &g)
+	if err != nil {
+		panic(err)
+	}
+
+	return g
 }

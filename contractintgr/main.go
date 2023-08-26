@@ -49,23 +49,27 @@ func main() {
 		log.Fatalf("Failed to Decode genesis file: %v", err)
 	}
 
-	allocData, err := makeThoraAlloc(g)
-	if err != nil {
-		log.Fatalf("Failed to make Thora Alloc: %v", err)
-	}
+	makeThoraAlloc(g)
 
-	log.Printf("const allocData: %v", allocData)
+	//allocData, err := makeThoraAlloc(g)
+	//if err != nil {
+	//	log.Fatalf("Failed to make Thora Alloc: %v", err)
+	//}
 
-	decodeg, err := contractintgr.DecodePreAlloc(allocData)
-	if err != nil {
-		log.Fatalf("Failed to decode Thora Alloc: %v", err)
-	}
-	for address, account := range decodeg {
-		log.Printf("address: %v\n", address.Hex())
-		log.Printf("balance: %v\n", account.Balance)
-		log.Printf("code: %v\n", account.Code)
-		log.Printf("storage: %v\n", account.Storage)
-		log.Println("--------------------------------------------------")
-	}
+	//log.Printf("const allocData: %v", allocData)
+
+	//decodeg, err := contractintgr.DecodePreAlloc(allocData)
+	//if err != nil {
+	//	log.Fatalf("Failed to decode Thora Alloc: %v", err)
+	//}
+	//for address, account := range decodeg {
+	//
+	//	log.Printf("address: %v\n", address.Hex())
+	//	log.Printf("balance: %v\n", account.Balance)
+	//	log.Printf("code: %v\n", account.Code)
+	//	log.Printf("storage: %v\n", account.Storage)
+	//
+	//	log.Println("--------------------------------------------------")
+	//}
 
 }
