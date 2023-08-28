@@ -32,7 +32,7 @@ var (
 	//SepoliaGenesisHash = common.HexToHash("0x25a5cc106eea7138acab33231d7160d69cb777ee0c2c553fcddf5138993e6dd9")
 	//GoerliGenesisHash = common.HexToHash("0xbf7e331f7f7c1dd2e05159666b3bf8bc7a8a3a9eb1d518969eab529dd9b88c1a")
 
-	PlatformMainNetGenesisHash = common.HexToHash("0x1ef3885a04aa216fa8cd49874c8f5e5be2ab299356024c1281fd6bb9f80ad599")
+	PlatformMainNetGenesisHash = common.HexToHash("0xef4001f644b4aa43a05d2c2ca82d93d985b7c6b4c98af0d3f36cedfb06352f60")
 	PlatformTestNetGenesisHash = common.HexToHash("0x47d9f81697ac9b5d7a900ba6d0cbbd6b5ab71a9351e369d811cd52b9a81c36c5")
 )
 
@@ -66,7 +66,12 @@ var (
 		TerminalTotalDifficulty:       nil,
 		TerminalTotalDifficultyPassed: false,
 		Ethash:                        nil,
-		Clique:                        &CliqueConfig{Period: 9, Epoch: 30000},
+		Thora: &ThoraConfig{
+			Period:      9,
+			Epoch:       30000,
+			BlockReward: new(big.Int).Mul(big.NewInt(100), big.NewInt(Ether)),
+		},
+		Clique: nil,
 	}
 
 	// PlatformTestnetChainConfig contains the chain parameters to run a node on the Platform test network.
