@@ -19,6 +19,8 @@ package ethconfig
 
 import (
 	"errors"
+	"github.com/ethereum/go-ethereum/consensus/thora"
+	"github.com/ethereum/go-ethereum/log"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -168,7 +170,14 @@ type Config struct {
 // only exist on already merged networks.
 func CreateConsensusEngine(config *params.ChainConfig, db ethdb.Database) (consensus.Engine, error) {
 	// If proof-of-authority is requested, set it up
+	if config.Thora != nil {
+		log.Info("Create Thora Consensus Engine")
+		return beacon.New(thora.New(config.Thora, db)), nil
+	}
+
+	// If proof-of-authority is requested, set it up
 	if config.Clique != nil {
+		log.Info("Create Clique Consensus Engine")
 		return beacon.New(clique.New(config.Clique, db)), nil
 	}
 	// If defaulting to proof-of-work, enforce an already merged network since

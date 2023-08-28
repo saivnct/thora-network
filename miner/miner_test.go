@@ -19,12 +19,12 @@ package miner
 
 import (
 	"errors"
+	"github.com/ethereum/go-ethereum/consensus/thora"
 	"math/big"
 	"testing"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/clique"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/state"
@@ -254,10 +254,18 @@ func waitForMiningState(t *testing.T, m *Miner, mining bool) {
 }
 
 func minerTestGenesisBlock(period uint64, gasLimit uint64, faucet common.Address) *core.Genesis {
-	config := *params.AllCliqueProtocolChanges
-	config.Clique = &params.CliqueConfig{
-		Period: period,
-		Epoch:  config.Clique.Epoch,
+	//config := *params.AllCliqueProtocolChanges
+	//config.Clique = &params.CliqueConfig{
+	//	Period: period,
+	//	Epoch:  config.Clique.Epoch,
+	//}
+
+	config := *params.AllThoraProtocolChanges
+	config.Thora = &params.ThoraConfig{
+		Period:          period,
+		Epoch:           config.Thora.Epoch,
+		BlockReward:     new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether)),
+		RewardRecipient: nil,
 	}
 
 	// Assemble and return the genesis with the precompiles and faucet pre-funded
@@ -294,7 +302,8 @@ func createMiner(t *testing.T) (*Miner, *event.TypeMux, func(skipMiner bool)) {
 		t.Fatalf("can't create new chain config: %v", err)
 	}
 	// Create consensus engine
-	engine := clique.New(chainConfig.Clique, chainDB)
+	//engine := clique.New(chainConfig.Clique, chainDB)
+	engine := thora.New(chainConfig.Thora, chainDB)
 	// Create Ethereum backend
 	bc, err := core.NewBlockChain(chainDB, nil, genesis, nil, engine, vm.Config{}, nil, nil)
 	if err != nil {

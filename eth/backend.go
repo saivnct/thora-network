@@ -20,6 +20,7 @@ package eth
 import (
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/consensus/thora"
 	"math/big"
 	"runtime"
 	"sync"
@@ -402,6 +403,18 @@ func (s *Ethereum) ValidateBeforeMining() (bool, error) {
 		return false, err
 	}
 
+	var tha *thora.Thora
+	if c, ok := s.engine.(*thora.Thora); ok {
+		tha = c
+	} else if cl, ok := s.engine.(*beacon.Beacon); ok {
+		if c, ok := cl.InnerEngine().(*thora.Thora); ok {
+			tha = c
+		}
+	}
+	if tha != nil {
+		return tha.IsCurrentValidator(eb, s.blockchain)
+	}
+
 	var cli *clique.Clique
 	if c, ok := s.engine.(*clique.Clique); ok {
 		cli = c
@@ -410,7 +423,6 @@ func (s *Ethereum) ValidateBeforeMining() (bool, error) {
 			cli = c
 		}
 	}
-
 	if cli != nil {
 		return cli.IsCurrentValidator(eb, s.blockchain)
 	}
@@ -421,7 +433,7 @@ func (s *Ethereum) ValidateBeforeMining() (bool, error) {
 // StartMining starts the miner with the given number of CPU threads. If mining
 // is already running, this method adjust the number of threads allowed to use
 // and updates the minimum price required by the transaction pool.
-func (s *Ethereum) StartMining(onCliqueSignerFnErr clique.OnSignerFnErr) error {
+func (s *Ethereum) StartMining(onThoraSignerFnErr thora.OnSignerFnErr) error {
 	// If the miner was not running, initialize it
 	if !s.IsMining() {
 		// Propagate the initial price point to the transaction pool
@@ -436,22 +448,42 @@ func (s *Ethereum) StartMining(onCliqueSignerFnErr clique.OnSignerFnErr) error {
 			log.Error("Cannot start mining without etherbase", "err", err)
 			return fmt.Errorf("etherbase missing: %v", err)
 		}
-		var cli *clique.Clique
-		if c, ok := s.engine.(*clique.Clique); ok {
-			cli = c
+
+		var tha *thora.Thora
+		if c, ok := s.engine.(*thora.Thora); ok {
+			tha = c
 		} else if cl, ok := s.engine.(*beacon.Beacon); ok {
-			if c, ok := cl.InnerEngine().(*clique.Clique); ok {
-				cli = c
+			if c, ok := cl.InnerEngine().(*thora.Thora); ok {
+				tha = c
 			}
 		}
-		if cli != nil {
+
+		if tha != nil {
 			wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
 			if wallet == nil || err != nil {
 				log.Error("Etherbase account unavailable locally", "err", err)
 				return fmt.Errorf("signer missing: %v", err)
 			}
-			cli.Authorize(eb, wallet.SignData, onCliqueSignerFnErr)
+			tha.Authorize(eb, wallet.SignData, onThoraSignerFnErr)
+		} else {
+			var cli *clique.Clique
+			if c, ok := s.engine.(*clique.Clique); ok {
+				cli = c
+			} else if cl, ok := s.engine.(*beacon.Beacon); ok {
+				if c, ok := cl.InnerEngine().(*clique.Clique); ok {
+					cli = c
+				}
+			}
+			if cli != nil {
+				wallet, err := s.accountManager.Find(accounts.Account{Address: eb})
+				if wallet == nil || err != nil {
+					log.Error("Etherbase account unavailable locally", "err", err)
+					return fmt.Errorf("signer missing: %v", err)
+				}
+				cli.Authorize(eb, wallet.SignData)
+			}
 		}
+
 		// If mining is started, we can disable the transaction rejection mechanism
 		// introduced to speed sync times.
 		s.handler.acceptTxs.Store(true)

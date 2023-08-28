@@ -17,6 +17,7 @@
 package miner
 
 import (
+	"github.com/ethereum/go-ethereum/consensus/thora"
 	"math/big"
 	"sync/atomic"
 	"testing"
@@ -53,6 +54,7 @@ var (
 	testTxPoolConfig  legacypool.Config
 	ethashChainConfig *params.ChainConfig
 	cliqueChainConfig *params.ChainConfig
+	thoraChainConfig  *params.ChainConfig
 
 	// Test accounts
 	testBankKey, _  = crypto.GenerateKey()
@@ -82,6 +84,15 @@ func init() {
 	cliqueChainConfig.Clique = &params.CliqueConfig{
 		Period: 10,
 		Epoch:  30000,
+	}
+
+	thoraChainConfig = new(params.ChainConfig)
+	*thoraChainConfig = *params.TestChainConfig
+	thoraChainConfig.Thora = &params.ThoraConfig{
+		Period:          10,
+		Epoch:           30000,
+		BlockReward:     new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether)),
+		RewardRecipient: nil,
 	}
 
 	signer := types.LatestSigner(params.TestChainConfig)
@@ -120,6 +131,12 @@ func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine 
 	}
 	switch e := engine.(type) {
 	case *clique.Clique:
+		gspec.ExtraData = make([]byte, 32+common.AddressLength+crypto.SignatureLength)
+		copy(gspec.ExtraData[32:32+common.AddressLength], testBankAddress.Bytes())
+		e.Authorize(testBankAddress, func(account accounts.Account, s string, data []byte) ([]byte, error) {
+			return crypto.Sign(crypto.Keccak256(data), testBankKey)
+		}, nil)
+	case *thora.Thora:
 		gspec.ExtraData = make([]byte, 32+common.AddressLength+crypto.SignatureLength)
 		copy(gspec.ExtraData[32:32+common.AddressLength], testBankAddress.Bytes())
 		e.Authorize(testBankAddress, func(account accounts.Account, s string, data []byte) ([]byte, error) {
@@ -209,11 +226,62 @@ func TestGenerateAndImportBlock(t *testing.T) {
 	}
 }
 
+func TestGenerateAndImportBlockThora(t *testing.T) {
+	var (
+		db     = rawdb.NewMemoryDatabase()
+		config = *params.AllThoraProtocolChanges
+	)
+	config.Thora = &params.ThoraConfig{
+		Period:          1,
+		Epoch:           30000,
+		BlockReward:     new(big.Int).Mul(big.NewInt(100), big.NewInt(params.Ether)),
+		RewardRecipient: nil,
+	}
+	engine := thora.New(config.Thora, db)
+
+	w, b := newTestWorker(t, &config, engine, db, 0)
+	defer w.close()
+
+	// This test chain imports the mined blocks.
+	chain, _ := core.NewBlockChain(rawdb.NewMemoryDatabase(), nil, b.genesis, nil, engine, vm.Config{}, nil, nil)
+	defer chain.Stop()
+
+	// Ignore empty commit here for less noise.
+	w.skipSealHook = func(task *task) bool {
+		return len(task.receipts) == 0
+	}
+
+	// Wait for mined blocks.
+	sub := w.mux.Subscribe(core.NewMinedBlockEvent{})
+	defer sub.Unsubscribe()
+
+	// Start mining!
+	w.start()
+
+	for i := 0; i < 5; i++ {
+		b.txPool.Add([]*txpool.Transaction{{Tx: b.newRandomTx(true)}}, true, false)
+		b.txPool.Add([]*txpool.Transaction{{Tx: b.newRandomTx(false)}}, true, false)
+
+		select {
+		case ev := <-sub.Chan():
+			block := ev.Data.(core.NewMinedBlockEvent).Block
+			if _, err := chain.InsertChain([]*types.Block{block}); err != nil {
+				t.Fatalf("failed to insert new mined block %d: %v", block.NumberU64(), err)
+			}
+		case <-time.After(3 * time.Second): // Worker needs 1s to include new changes.
+			t.Fatalf("timeout")
+		}
+	}
+}
+
 func TestEmptyWorkEthash(t *testing.T) {
 	testEmptyWork(t, ethashChainConfig, ethash.NewFaker())
 }
 func TestEmptyWorkClique(t *testing.T) {
 	testEmptyWork(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, rawdb.NewMemoryDatabase()))
+}
+func TestEmptyWorkThora(t *testing.T) {
+	testEmptyWork(t, thoraChainConfig, thora.New(thoraChainConfig.Thora, rawdb.NewMemoryDatabase()))
 }
 
 func testEmptyWork(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine) {
@@ -257,6 +325,10 @@ func TestAdjustIntervalEthash(t *testing.T) {
 
 func TestAdjustIntervalClique(t *testing.T) {
 	testAdjustInterval(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, rawdb.NewMemoryDatabase()))
+}
+
+func TestAdjustIntervalThora(t *testing.T) {
+	testAdjustInterval(t, thoraChainConfig, thora.New(thoraChainConfig.Thora, rawdb.NewMemoryDatabase()))
 }
 
 func testAdjustInterval(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine) {
@@ -353,6 +425,10 @@ func TestGetSealingWorkClique(t *testing.T) {
 	testGetSealingWork(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, rawdb.NewMemoryDatabase()))
 }
 
+func TestGetSealingWorkThora(t *testing.T) {
+	testGetSealingWork(t, thoraChainConfig, thora.New(thoraChainConfig.Thora, rawdb.NewMemoryDatabase()))
+}
+
 func TestGetSealingWorkPostMerge(t *testing.T) {
 	local := new(params.ChainConfig)
 	*local = *ethashChainConfig
@@ -382,6 +458,10 @@ func testGetSealingWork(t *testing.T, chainConfig *params.ChainConfig, engine co
 			t.Logf("Invalid timestamp, want %d, get %d", timestamp, block.Time())
 		}
 		_, isClique := engine.(*clique.Clique)
+		_, isThora := engine.(*thora.Thora)
+
+		isClique = isClique || isThora
+
 		if !isClique {
 			if len(block.Extra()) != 2 {
 				t.Error("Unexpected extra field")

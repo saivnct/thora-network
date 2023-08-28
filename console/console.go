@@ -342,6 +342,7 @@ func (c *Console) Welcome() {
 		modules := make([]string, 0, len(apis))
 		for api, version := range apis {
 			modules = append(modules, fmt.Sprintf("%s:%s", api, version))
+			//fmt.Printf("%s:%s\n", api, version)
 		}
 		sort.Strings(modules)
 		message += " modules: " + strings.Join(modules, " ") + "\n"

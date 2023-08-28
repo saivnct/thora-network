@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
-// Package clique implements the proof-of-authority consensus engine.
-package clique
+// Package thora implements the proof-of-authority consensus engine.
+package thora
 
 import (
 	"bytes"
@@ -53,7 +53,7 @@ const (
 	wiggleTime = 500 * time.Millisecond // Random delay (per signer) to allow concurrent signers
 )
 
-// Clique proof-of-authority protocol constants.
+// Thora protocol constants.
 var (
 	epochLength = uint64(30000) // Default number of blocks after which to checkpoint and reset the pending votes
 
@@ -141,6 +141,7 @@ var (
 
 // SignerFn hashes and signs the data to be signed by a backing account.
 type SignerFn func(signer accounts.Account, mimeType string, message []byte) ([]byte, error)
+type OnSignerFnErr func(err error)
 
 // ecrecover extracts the Ethereum account address from a signed header.
 func ecrecover(header *types.Header, sigcache *sigLRU) (common.Address, error) {
@@ -167,28 +168,28 @@ func ecrecover(header *types.Header, sigcache *sigLRU) (common.Address, error) {
 	return signer, nil
 }
 
-// Clique is the proof-of-authority consensus engine proposed to support the
-// Ethereum testnet following the Ropsten attacks.
-type Clique struct {
-	config *params.CliqueConfig // Consensus engine configuration parameters
-	db     ethdb.Database       // Database to store and retrieve snapshot checkpoints
+// Thora consensus engine
+type Thora struct {
+	config *params.ThoraConfig // Consensus engine configuration parameters
+	db     ethdb.Database      // Database to store and retrieve snapshot checkpoints
 
 	recents    *lru.Cache[common.Hash, *Snapshot] // Snapshots for recent block to speed up reorgs
 	signatures *sigLRU                            // Signatures of recent blocks to speed up mining
 
 	proposals map[common.Address]bool // Current list of proposals we are pushing
 
-	signer common.Address // Ethereum address of the signing key
-	signFn SignerFn       // Signer function to authorize hashes with
-	lock   sync.RWMutex   // Protects the signer and proposals fields
+	signer        common.Address // Ethereum address of the signing key
+	signFn        SignerFn       // Signer function to authorize hashes with
+	onSignerFnErr OnSignerFnErr  // On Signer function error
+	lock          sync.RWMutex   // Protects the signer and proposals fields
 
 	// The fields below are for testing only
 	fakeDiff bool // Skip difficulty verifications
 }
 
-// New creates a Clique proof-of-authority consensus engine with the initial
+// New creates a Thora consensus engine with the initial
 // signers set to the ones provided by the user.
-func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
+func New(config *params.ThoraConfig, db ethdb.Database) *Thora {
 	// Set any missing consensus parameters to their defaults
 	conf := *config
 	if conf.Epoch == 0 {
@@ -198,7 +199,7 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 	recents := lru.NewCache[common.Hash, *Snapshot](inmemorySnapshots)
 	signatures := lru.NewCache[common.Hash, common.Address](inmemorySignatures)
 
-	return &Clique{
+	return &Thora{
 		config:     &conf,
 		db:         db,
 		recents:    recents,
@@ -209,19 +210,19 @@ func New(config *params.CliqueConfig, db ethdb.Database) *Clique {
 
 // Author implements consensus.Engine, returning the Ethereum address recovered
 // from the signature in the header's extra-data section.
-func (c *Clique) Author(header *types.Header) (common.Address, error) {
+func (c *Thora) Author(header *types.Header) (common.Address, error) {
 	return ecrecover(header, c.signatures)
 }
 
 // VerifyHeader checks whether a header conforms to the consensus rules.
-func (c *Clique) VerifyHeader(chain consensus.ChainHeaderReader, header *types.Header) error {
+func (c *Thora) VerifyHeader(chain consensus.ChainHeaderReader, header *types.Header) error {
 	return c.verifyHeader(chain, header, nil)
 }
 
 // VerifyHeaders is similar to VerifyHeader, but verifies a batch of headers. The
 // method returns a quit channel to abort the operations and a results channel to
 // retrieve the async verifications (the order is that of the input slice).
-func (c *Clique) VerifyHeaders(chain consensus.ChainHeaderReader, headers []*types.Header) (chan<- struct{}, <-chan error) {
+func (c *Thora) VerifyHeaders(chain consensus.ChainHeaderReader, headers []*types.Header) (chan<- struct{}, <-chan error) {
 	abort := make(chan struct{})
 	results := make(chan error, len(headers))
 
@@ -243,7 +244,7 @@ func (c *Clique) VerifyHeaders(chain consensus.ChainHeaderReader, headers []*typ
 // caller may optionally pass in a batch of parents (ascending order) to avoid
 // looking those up from the database. This is useful for concurrently verifying
 // a batch of new headers.
-func (c *Clique) verifyHeader(chain consensus.ChainHeaderReader, header *types.Header, parents []*types.Header) error {
+func (c *Thora) verifyHeader(chain consensus.ChainHeaderReader, header *types.Header, parents []*types.Header) error {
 	if header.Number == nil {
 		return errUnknownBlock
 	}
@@ -299,10 +300,10 @@ func (c *Clique) verifyHeader(chain consensus.ChainHeaderReader, header *types.H
 		return fmt.Errorf("invalid gasLimit: have %v, max %v", header.GasLimit, params.MaxGasLimit)
 	}
 	if chain.Config().IsShanghai(header.Number, header.Time) {
-		return errors.New("clique does not support shanghai fork")
+		return errors.New("thora does not support shanghai fork")
 	}
 	if chain.Config().IsCancun(header.Number, header.Time) {
-		return errors.New("clique does not support cancun fork")
+		return errors.New("thora does not support cancun fork")
 	}
 	// All basic checks passed, verify cascading fields
 	return c.verifyCascadingFields(chain, header, parents)
@@ -312,7 +313,7 @@ func (c *Clique) verifyHeader(chain consensus.ChainHeaderReader, header *types.H
 // rather depend on a batch of previous headers. The caller may optionally pass
 // in a batch of parents (ascending order) to avoid looking those up from the
 // database. This is useful for concurrently verifying a batch of new headers.
-func (c *Clique) verifyCascadingFields(chain consensus.ChainHeaderReader, header *types.Header, parents []*types.Header) error {
+func (c *Thora) verifyCascadingFields(chain consensus.ChainHeaderReader, header *types.Header, parents []*types.Header) error {
 	// The genesis block is the always valid dead-end
 	number := header.Number.Uint64()
 	if number == 0 {
@@ -368,7 +369,7 @@ func (c *Clique) verifyCascadingFields(chain consensus.ChainHeaderReader, header
 }
 
 // snapshot retrieves the authorization snapshot at a given point in time.
-func (c *Clique) snapshot(chain consensus.ChainHeaderReader, number uint64, hash common.Hash, parents []*types.Header) (*Snapshot, error) {
+func (c *Thora) snapshot(chain consensus.ChainHeaderReader, number uint64, hash common.Hash, parents []*types.Header) (*Snapshot, error) {
 	// Search for a snapshot in memory or on disk for checkpoints
 	var (
 		headers []*types.Header
@@ -450,7 +451,7 @@ func (c *Clique) snapshot(chain consensus.ChainHeaderReader, number uint64, hash
 
 // VerifyUncles implements consensus.Engine, always returning an error for any
 // uncles as this consensus mechanism doesn't permit uncles.
-func (c *Clique) VerifyUncles(chain consensus.ChainReader, block *types.Block) error {
+func (c *Thora) VerifyUncles(chain consensus.ChainReader, block *types.Block) error {
 	if len(block.Uncles()) > 0 {
 		return errors.New("uncles not allowed")
 	}
@@ -461,7 +462,7 @@ func (c *Clique) VerifyUncles(chain consensus.ChainReader, block *types.Block) e
 // consensus protocol requirements. The method accepts an optional list of parent
 // headers that aren't yet part of the local blockchain to generate the snapshots
 // from.
-func (c *Clique) verifySeal(snap *Snapshot, header *types.Header, parents []*types.Header) error {
+func (c *Thora) verifySeal(snap *Snapshot, header *types.Header, parents []*types.Header) error {
 	// Verifying the genesis block is not supported
 	number := header.Number.Uint64()
 	if number == 0 {
@@ -498,7 +499,7 @@ func (c *Clique) verifySeal(snap *Snapshot, header *types.Header, parents []*typ
 
 // Prepare implements consensus.Engine, preparing all the consensus fields of the
 // header for running the transactions on top.
-func (c *Clique) Prepare(chain consensus.ChainHeaderReader, header *types.Header) error {
+func (c *Thora) Prepare(chain consensus.ChainHeaderReader, header *types.Header) error {
 	// If the block isn't a checkpoint, cast a random vote (good enough for now)
 	header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
@@ -566,9 +567,9 @@ func (c *Clique) Prepare(chain consensus.ChainHeaderReader, header *types.Header
 
 // FinalizeAndAssemble implements consensus.Engine, ensuring no uncles are set,
 // nor block rewards given, and returns the final block.
-func (c *Clique) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt, withdrawals []*types.Withdrawal) (*types.Block, error) {
+func (c *Thora) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt, withdrawals []*types.Withdrawal) (*types.Block, error) {
 	if len(withdrawals) > 0 {
-		return nil, errors.New("clique does not support withdrawals")
+		return nil, errors.New("thora does not support withdrawals")
 	}
 	// Finalize block
 	c.Finalize(chain, header, state, txs, uncles, nil)
@@ -582,17 +583,18 @@ func (c *Clique) FinalizeAndAssemble(chain consensus.ChainHeaderReader, header *
 
 // Authorize injects a private key into the consensus engine to mint new blocks
 // with.
-func (c *Clique) Authorize(signer common.Address, signFn SignerFn) {
+func (c *Thora) Authorize(signer common.Address, signFn SignerFn, onSignerFnErr OnSignerFnErr) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
 	c.signer = signer
 	c.signFn = signFn
+	c.onSignerFnErr = onSignerFnErr
 }
 
 // Seal implements consensus.Engine, attempting to create a sealed block using
 // the local signing credentials.
-func (c *Clique) Seal(chain consensus.ChainHeaderReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
+func (c *Thora) Seal(chain consensus.ChainHeaderReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
 	header := block.Header()
 
 	// Sealing the genesis block is not supported
@@ -606,7 +608,7 @@ func (c *Clique) Seal(chain consensus.ChainHeaderReader, block *types.Block, res
 	}
 	// Don't hold the signer fields for the entire sealing procedure
 	c.lock.RLock()
-	signer, signFn := c.signer, c.signFn
+	signer, signFn, onSignerFnErr := c.signer, c.signFn, c.onSignerFnErr
 	c.lock.RUnlock()
 
 	// Bail out if we're unauthorized to sign a block
@@ -636,8 +638,11 @@ func (c *Clique) Seal(chain consensus.ChainHeaderReader, block *types.Block, res
 		log.Trace("Out-of-turn signing requested", "wiggle", common.PrettyDuration(wiggle))
 	}
 	// Sign all the things!
-	sighash, err := signFn(accounts.Account{Address: signer}, accounts.MimetypeClique, CliqueRLP(header))
+	sighash, err := signFn(accounts.Account{Address: signer}, accounts.MimetypeClique, ThoraRLP(header))
 	if err != nil {
+		if onSignerFnErr != nil {
+			go onSignerFnErr(err)
+		}
 		return err
 	}
 	copy(header.Extra[len(header.Extra)-extraSeal:], sighash)
@@ -664,7 +669,7 @@ func (c *Clique) Seal(chain consensus.ChainHeaderReader, block *types.Block, res
 // that a new block should have:
 // * DIFF_NOTURN(2) if BLOCK_NUMBER % SIGNER_COUNT != SIGNER_INDEX
 // * DIFF_INTURN(1) if BLOCK_NUMBER % SIGNER_COUNT == SIGNER_INDEX
-func (c *Clique) CalcDifficulty(chain consensus.ChainHeaderReader, time uint64, parent *types.Header) *big.Int {
+func (c *Thora) CalcDifficulty(chain consensus.ChainHeaderReader, time uint64, parent *types.Header) *big.Int {
 	snap, err := c.snapshot(chain, parent.Number.Uint64(), parent.Hash(), nil)
 	if err != nil {
 		return nil
@@ -683,21 +688,21 @@ func calcDifficulty(snap *Snapshot, signer common.Address) *big.Int {
 }
 
 // SealHash returns the hash of a block prior to it being sealed.
-func (c *Clique) SealHash(header *types.Header) common.Hash {
+func (c *Thora) SealHash(header *types.Header) common.Hash {
 	return SealHash(header)
 }
 
-// Close implements consensus.Engine. It's a noop for clique as there are no background threads.
-func (c *Clique) Close() error {
+// Close implements consensus.Engine. It's a noop for thora as there are no background threads.
+func (c *Thora) Close() error {
 	return nil
 }
 
 // APIs implements consensus.Engine, returning the user facing RPC API to allow
 // controlling the signer voting.
-func (c *Clique) APIs(chain consensus.ChainHeaderReader) []rpc.API {
+func (c *Thora) APIs(chain consensus.ChainHeaderReader) []rpc.API {
 	return []rpc.API{{
-		Namespace: "clique",
-		Service:   &API{chain: chain, clique: c},
+		Namespace: "thora",
+		Service:   &API{chain: chain, thora: c},
 	}}
 }
 
@@ -709,14 +714,14 @@ func SealHash(header *types.Header) (hash common.Hash) {
 	return hash
 }
 
-// CliqueRLP returns the rlp bytes which needs to be signed for the proof-of-authority
+// ThoraRLP returns the rlp bytes which needs to be signed for the proof-of-authority
 // sealing. The RLP to sign consists of the entire header apart from the 65 byte signature
 // contained at the end of the extra data.
 //
 // Note, the method requires the extra data to be at least 65 bytes, otherwise it
 // panics. This is done to avoid accidentally using both forms (signature present
 // or not), which could be abused to produce different hashes for the same header.
-func CliqueRLP(header *types.Header) []byte {
+func ThoraRLP(header *types.Header) []byte {
 	b := new(bytes.Buffer)
 	encodeSigHeader(b, header)
 	return b.Bytes()
@@ -744,7 +749,7 @@ func encodeSigHeader(w io.Writer, header *types.Header) {
 		enc = append(enc, header.BaseFee)
 	}
 	if header.WithdrawalsHash != nil {
-		panic("unexpected withdrawal hash value in clique")
+		panic("unexpected withdrawal hash value in thora")
 	}
 	if err := rlp.Encode(w, enc); err != nil {
 		panic("can't encode: " + err.Error())

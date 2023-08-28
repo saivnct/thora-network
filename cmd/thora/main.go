@@ -411,7 +411,7 @@ func startNode(ctx *cli.Context, stack *node.Node, backend ethapi.Backend, isCon
 
 	// Start auxiliary services if enabled
 	if ctx.Bool(utils.MiningEnabledFlag.Name) {
-		onCliqueSignerFnErr := func(err error) {
+		onThoraSignerFnErr := func(err error) {
 			log.Error("On SignFn Error", "err", err)
 			externalSigner := stack.Config().ExternalSigner
 			if len(externalSigner) > 0 {
@@ -439,7 +439,7 @@ func startNode(ctx *cli.Context, stack *node.Node, backend ethapi.Backend, isCon
 		// Set the gas price to the limits from the CLI and start mining
 		gasprice := flags.GlobalBig(ctx, utils.MinerGasPriceFlag.Name)
 		ethBackend.TxPool().SetGasTip(gasprice)
-		if err := ethBackend.StartMining(onCliqueSignerFnErr); err != nil {
+		if err := ethBackend.StartMining(onThoraSignerFnErr); err != nil {
 			utils.Fatalf("Failed to start mining: %v", err)
 		}
 	}

@@ -18,10 +18,13 @@ package params
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/common/math"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 )
+
+//go:generate go run github.com/fjl/gencodec -type ThoraConfig -field-override thoraConfigMarshaling -out gen_thora_config.go
 
 // Genesis hashes to enforce below configs on.
 var (
@@ -92,7 +95,12 @@ var (
 		TerminalTotalDifficulty:       nil,
 		TerminalTotalDifficultyPassed: false,
 		Ethash:                        nil,
-		Clique:                        &CliqueConfig{Period: 9, Epoch: 30000},
+		Thora: &ThoraConfig{
+			Period:      9,
+			Epoch:       30000,
+			BlockReward: new(big.Int).Mul(big.NewInt(100), big.NewInt(Ether)),
+		},
+		Clique: nil,
 	}
 
 	MainnetTerminalTotalDifficulty, _ = new(big.Int).SetString("58_750_000_000_000_000_000_000", 0)
@@ -250,6 +258,37 @@ var (
 		Clique:                        &CliqueConfig{Period: 0, Epoch: 30000},
 	}
 
+	// AllThoraProtocolChanges contains every protocol change (EIPs) introduced
+	// and accepted by the Ethereum core developers into the Thora consensus.
+	AllThoraProtocolChanges = &ChainConfig{
+		ChainID:                       big.NewInt(1337),
+		HomesteadBlock:                big.NewInt(0),
+		DAOForkBlock:                  nil,
+		DAOForkSupport:                false,
+		EIP150Block:                   big.NewInt(0),
+		EIP155Block:                   big.NewInt(0),
+		EIP158Block:                   big.NewInt(0),
+		ByzantiumBlock:                big.NewInt(0),
+		ConstantinopleBlock:           big.NewInt(0),
+		PetersburgBlock:               big.NewInt(0),
+		IstanbulBlock:                 big.NewInt(0),
+		MuirGlacierBlock:              big.NewInt(0),
+		BerlinBlock:                   big.NewInt(0),
+		LondonBlock:                   big.NewInt(0),
+		ArrowGlacierBlock:             nil,
+		GrayGlacierBlock:              nil,
+		MergeNetsplitBlock:            nil,
+		ShanghaiTime:                  nil,
+		CancunTime:                    nil,
+		PragueTime:                    nil,
+		VerkleTime:                    nil,
+		TerminalTotalDifficulty:       nil,
+		TerminalTotalDifficultyPassed: false,
+		Ethash:                        nil,
+		Clique:                        nil,
+		Thora:                         &ThoraConfig{Period: 0, Epoch: 30000},
+	}
+
 	// TestChainConfig contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers for testing proposes.
 	TestChainConfig = &ChainConfig{
@@ -278,6 +317,7 @@ var (
 		TerminalTotalDifficultyPassed: false,
 		Ethash:                        new(EthashConfig),
 		Clique:                        nil,
+		Thora:                         nil,
 	}
 
 	// NonActivatedConfig defines the chain configuration without activating
@@ -308,6 +348,7 @@ var (
 		TerminalTotalDifficultyPassed: false,
 		Ethash:                        new(EthashConfig),
 		Clique:                        nil,
+		Thora:                         nil,
 	}
 	TestRules = TestChainConfig.Rules(new(big.Int), false, 0)
 )
@@ -370,6 +411,7 @@ type ChainConfig struct {
 	// Various consensus engines
 	Ethash    *EthashConfig `json:"ethash,omitempty"`
 	Clique    *CliqueConfig `json:"clique,omitempty"`
+	Thora     *ThoraConfig  `json:"thora,omitempty"`
 	IsDevMode bool          `json:"isDev,omitempty"`
 }
 
@@ -390,6 +432,23 @@ type CliqueConfig struct {
 // String implements the stringer interface, returning the consensus engine details.
 func (c *CliqueConfig) String() string {
 	return "clique"
+}
+
+// ThoraConfig is the consensus engine configs for proof-of-authority based sealing.
+type ThoraConfig struct {
+	Period          uint64          `json:"period"`                          // Number of seconds between blocks to enforce
+	Epoch           uint64          `json:"epoch"`                           // Epoch length to reset votes and checkpoint
+	BlockReward     *big.Int        `json:"blockReward" gencodec:"required"` // Block reward
+	RewardRecipient *common.Address `json:"rewardRecipient,omitempty"`       //Reward Recipient, default recipients is validators if this value nil or zero address
+}
+
+// String implements the stringer interface, returning the consensus engine details.
+func (t *ThoraConfig) String() string {
+	return "thora"
+}
+
+type thoraConfigMarshaling struct {
+	BlockReward *math.HexOrDecimal256
 }
 
 // Description returns a human-readable description of ChainConfig.

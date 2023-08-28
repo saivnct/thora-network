@@ -19,6 +19,7 @@ package web3ext
 
 var Modules = map[string]string{
 	"admin":    AdminJs,
+	"thora":    ThoraJs,
 	"clique":   CliqueJs,
 	"ethash":   EthashJs,
 	"debug":    DebugJs,
@@ -32,6 +33,63 @@ var Modules = map[string]string{
 	"vflux":    VfluxJs,
 	"dev":      DevJs,
 }
+
+const ThoraJs = `
+web3._extend({
+	property: 'thora',
+	methods: [
+		new web3._extend.Method({
+			name: 'getSnapshot',
+			call: 'thora_getSnapshot',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getSnapshotAtHash',
+			call: 'thora_getSnapshotAtHash',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'getSigners',
+			call: 'thora_getSigners',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputBlockNumberFormatter]
+		}),
+		new web3._extend.Method({
+			name: 'getSignersAtHash',
+			call: 'thora_getSignersAtHash',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'propose',
+			call: 'thora_propose',
+			params: 2
+		}),
+		new web3._extend.Method({
+			name: 'discard',
+			call: 'thora_discard',
+			params: 1
+		}),
+		new web3._extend.Method({
+			name: 'status',
+			call: 'thora_status',
+			params: 0
+		}),
+		new web3._extend.Method({
+			name: 'getSigner',
+			call: 'thora_getSigner',
+			params: 1,
+			inputFormatter: [null]
+		}),
+	],
+	properties: [
+		new web3._extend.Property({
+			name: 'proposals',
+			getter: 'thora_proposals'
+		}),
+	]
+});
+`
 
 const CliqueJs = `
 web3._extend({
