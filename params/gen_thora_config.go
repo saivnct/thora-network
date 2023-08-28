@@ -2,7 +2,6 @@ package params
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"math/big"
@@ -41,12 +40,12 @@ func (t *ThoraConfig) UnmarshalJSON(input []byte) error {
 	if err := json.Unmarshal(input, &dec); err != nil {
 		return err
 	}
-	if dec.BlockReward == nil {
-		return errors.New("missing required field 'balance' for GenesisAccount")
-	}
-	t.BlockReward = (*big.Int)(dec.BlockReward)
 	t.Period = uint64(*dec.Period)
 	t.Epoch = uint64(*dec.Epoch)
+
+	if dec.BlockReward != nil {
+		t.BlockReward = (*big.Int)(dec.BlockReward)
+	}
 	if dec.RewardRecipient != nil {
 		t.RewardRecipient = dec.RewardRecipient
 	}

@@ -32,13 +32,15 @@ var (
 	//SepoliaGenesisHash = common.HexToHash("0x25a5cc106eea7138acab33231d7160d69cb777ee0c2c553fcddf5138993e6dd9")
 	//GoerliGenesisHash = common.HexToHash("0xbf7e331f7f7c1dd2e05159666b3bf8bc7a8a3a9eb1d518969eab529dd9b88c1a")
 
-	PlatformMainNetGenesisHash = common.HexToHash("0xef4001f644b4aa43a05d2c2ca82d93d985b7c6b4c98af0d3f36cedfb06352f60")
-	PlatformTestNetGenesisHash = common.HexToHash("0x47d9f81697ac9b5d7a900ba6d0cbbd6b5ab71a9351e369d811cd52b9a81c36c5")
+	PlatformMainNetGenesisHash = common.HexToHash("0x15181322a6154cc37df6f16fe58cd15526692a0c9322ab06d65bf6725d66229c")
+	PlatformTestNetGenesisHash = common.HexToHash("0x81e9697b95935b2a0c25fb5132b523e01f84e2df912f11a62341435e90f01515")
 )
 
 func newUint64(val uint64) *uint64 { return &val }
 
 var (
+	MainnetRewardRecipient = common.HexToAddress("0x0000000000000000000000000000000000000088")
+	TestnetRewardRecipient = common.HexToAddress("0x0000000000000000000000000000000000000089")
 
 	// PlatformMainnetChainConfig contains the chain parameters to run a node on the Platform main network.
 	PlatformMainnetChainConfig = &ChainConfig{
@@ -67,9 +69,10 @@ var (
 		TerminalTotalDifficultyPassed: false,
 		Ethash:                        nil,
 		Thora: &ThoraConfig{
-			Period:      9,
-			Epoch:       30000,
-			BlockReward: new(big.Int).Mul(big.NewInt(100), big.NewInt(Ether)),
+			Period:          9,
+			Epoch:           30000,
+			BlockReward:     new(big.Int).Mul(big.NewInt(100), big.NewInt(Ether)),
+			RewardRecipient: &MainnetRewardRecipient,
 		},
 		Clique: nil,
 	}
@@ -101,9 +104,10 @@ var (
 		TerminalTotalDifficultyPassed: false,
 		Ethash:                        nil,
 		Thora: &ThoraConfig{
-			Period:      9,
-			Epoch:       30000,
-			BlockReward: new(big.Int).Mul(big.NewInt(100), big.NewInt(Ether)),
+			Period:          9,
+			Epoch:           30000,
+			BlockReward:     new(big.Int).Mul(big.NewInt(100), big.NewInt(Ether)),
+			RewardRecipient: &TestnetRewardRecipient,
 		},
 		Clique: nil,
 	}
@@ -291,7 +295,11 @@ var (
 		TerminalTotalDifficultyPassed: false,
 		Ethash:                        nil,
 		Clique:                        nil,
-		Thora:                         &ThoraConfig{Period: 0, Epoch: 30000},
+		Thora: &ThoraConfig{
+			Period:      0,
+			Epoch:       30000,
+			BlockReward: new(big.Int).Mul(big.NewInt(100), big.NewInt(Ether)),
+		},
 	}
 
 	// TestChainConfig contains every protocol change (EIPs) introduced
@@ -443,7 +451,7 @@ func (c *CliqueConfig) String() string {
 type ThoraConfig struct {
 	Period          uint64          `json:"period"`                          // Number of seconds between blocks to enforce
 	Epoch           uint64          `json:"epoch"`                           // Epoch length to reset votes and checkpoint
-	BlockReward     *big.Int        `json:"blockReward" gencodec:"required"` // Block reward
+	BlockReward     *big.Int        `json:"blockReward" gencodec:"required"` // Block reward is the reward in wei distributed each block.
 	RewardRecipient *common.Address `json:"rewardRecipient,omitempty"`       //Reward Recipient, default recipients is validators if this value nil or zero address
 }
 
