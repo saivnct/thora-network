@@ -424,7 +424,7 @@ func (s *Ethereum) ValidateBeforeMining() (bool, error) {
 		}
 	}
 	if cli != nil {
-		return cli.IsCurrentValidator(eb, s.blockchain)
+		return true, nil
 	}
 
 	return false, errors.New("not support POW mining")

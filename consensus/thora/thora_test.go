@@ -93,7 +93,7 @@ func makePlatformChain(genesis *core.Genesis, engine consensus.Engine, blocks []
 		}
 
 		if parentSigner != nil {
-			statedb.AddBalance(*parentSigner, BlockReward)
+			statedb.AddBalance(*parentSigner, genesis.Config.Thora.BlockReward)
 		}
 
 		header.Root = statedb.IntermediateRoot(genesis.Config.IsEIP158(header.Number))

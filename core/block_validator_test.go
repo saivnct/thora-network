@@ -112,7 +112,7 @@ func makePlatformChain3(genesis *Genesis, blocks []*types.Block, signer common.A
 		header.ParentHash = parent.Hash()
 
 		if parentSigner != nil {
-			statedb.AddBalance(*parentSigner, clique.BlockReward)
+			statedb.AddBalance(*parentSigner, genesis.Config.Thora.BlockReward)
 		}
 
 		header.Root = statedb.IntermediateRoot(genesis.Config.IsEIP158(header.Number))
@@ -165,8 +165,6 @@ func testHeaderVerificationForMerging(t *testing.T, isClique bool) {
 
 		td := 0
 		genDb, blocks, _ := GenerateChainWithGenesis(gspec, engine, 8, nil)
-
-		genDb, blocks = makePlatformChain3(gspec, blocks, addr)
 
 		for i, block := range blocks {
 			header := block.Header()

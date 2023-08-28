@@ -537,7 +537,7 @@ func makePlatformChain2(genesis *core.Genesis, blocks []*types.Block, accounts *
 
 		if i > 0 {
 			signer := accounts.address(tt.votes[i-1].signer)
-			statedb.AddBalance(signer, BlockReward)
+			statedb.AddBalance(signer, genesis.Config.Thora.BlockReward)
 		}
 
 		header.Root = statedb.IntermediateRoot(genesis.Config.IsEIP158(header.Number))

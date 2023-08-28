@@ -17,12 +17,6 @@
 package clique
 
 import (
-	"crypto/ecdsa"
-	"fmt"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/misc"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/trie"
 	"math/big"
 	"testing"
 
@@ -34,89 +28,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
 )
-
-func makePlatformChain(genesis *core.Genesis, engine consensus.Engine, blocks []*types.Block, signer common.Address, key *ecdsa.PrivateKey, txSigner *types.HomesteadSigner) []*types.Block {
-	newDb := rawdb.NewMemoryDatabase()
-	parent, err := genesis.Commit(newDb, trie.NewDatabase(newDb))
-	var parentSigner *common.Address
-
-	if err != nil {
-		panic(err)
-	}
-	chain, _ := core.NewBlockChain(rawdb.NewMemoryDatabase(), nil, genesis, nil, engine, vm.Config{}, nil, nil)
-	defer chain.Stop()
-
-	newBlocks := make(types.Blocks, len(blocks))
-
-	for i, block := range blocks {
-		header := block.Header()
-
-		receipts := []*types.Receipt{}
-		txs := []*types.Transaction{}
-
-		statedb, err := state.New(parent.Root(), state.NewDatabase(newDb), nil)
-		if err != nil {
-			panic(err)
-		}
-
-		header.ParentHash = parent.Hash()
-		header.GasLimit = parent.GasLimit()
-		header.Coinbase = parent.Coinbase()
-		if chain.Config().IsLondon(header.Number) {
-			header.BaseFee = misc.CalcBaseFee(chain.Config(), parent.Header())
-			if !chain.Config().IsLondon(parent.Number()) {
-				parentGasLimit := parent.GasLimit() * chain.Config().ElasticityMultiplier()
-				header.GasLimit = core.CalcGasLimit(parentGasLimit, parentGasLimit)
-			}
-		}
-
-		// We want to simulate an empty middle block, having the same state as the
-		// first one. The last is needs a state change again to force a reorg.
-		if i != 1 {
-			txNonce := statedb.GetNonce(signer)
-			baseFee := new(big.Int).Set(header.BaseFee)
-			tx, err := types.SignTx(types.NewTransaction(txNonce, common.Address{0x00}, new(big.Int), params.TxGas, baseFee, nil), txSigner, key)
-			if err != nil {
-				panic(err)
-			}
-			gasPool := new(core.GasPool).AddGas(header.GasLimit)
-
-			statedb.SetTxContext(tx.Hash(), 0)
-
-			receipt, err := core.ApplyTransaction(genesis.Config, chain, &header.Coinbase, gasPool, statedb, header, tx, &header.GasUsed, vm.Config{})
-			if err != nil {
-				panic(err)
-			}
-
-			receipts = append(receipts, receipt)
-			txs = append(txs, tx)
-		}
-
-		if parentSigner != nil {
-			statedb.AddBalance(*parentSigner, BlockReward)
-		}
-
-		header.Root = statedb.IntermediateRoot(genesis.Config.IsEIP158(header.Number))
-
-		newBlock := types.NewBlock(header, txs, nil, receipts, trie.NewStackTrie(nil))
-
-		// Write state changes to db
-		root, err := statedb.Commit(genesis.Config.IsEIP158(header.Number))
-		if err != nil {
-			panic(fmt.Sprintf("state write error: %v", err))
-		}
-
-		if err := statedb.Database().TrieDB().Commit(root, false); err != nil {
-			panic(fmt.Sprintf("trie write error: %v", err))
-		}
-
-		newBlocks[i] = newBlock
-		parent = newBlock
-		parentSigner = &signer
-	}
-
-	return newBlocks
-}
 
 // This test case is a repro of an annoying bug that took us forever to catch.
 // In Clique PoA networks (Görli, etc), consecutive blocks might have
@@ -154,17 +65,14 @@ func TestReimportMirroredState(t *testing.T) {
 
 		// We want to simulate an empty middle block, having the same state as the
 		// first one. The last is needs a state change again to force a reorg.
-		//if i != 1 {
-		//	tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr), common.Address{0x00}, new(big.Int), params.TxGas, block.BaseFee(), nil), signer, key)
-		//	if err != nil {
-		//		panic(err)
-		//	}
-		//block.AddTxWithChain(chain, tx)
-		//}
+		if i != 1 {
+			tx, err := types.SignTx(types.NewTransaction(block.TxNonce(addr), common.Address{0x00}, new(big.Int), params.TxGas, block.BaseFee(), nil), signer, key)
+			if err != nil {
+				panic(err)
+			}
+			block.AddTxWithChain(chain, tx)
+		}
 	})
-
-	blocks = makePlatformChain(genspec, engine, blocks, addr, key, signer)
-
 	for i, block := range blocks {
 		header := block.Header()
 		if i > 0 {
