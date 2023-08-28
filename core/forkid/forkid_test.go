@@ -121,11 +121,11 @@ func TestCreation(t *testing.T) {
 			params.PlatformTestnetChainConfig,
 			params.PlatformTestNetGenesisHash,
 			[]testcase{
-				{0, 0, ID{Hash: checksumToBytes(0xedddd61a), Next: 0}},                // Unsynced, last Frontier, Homestead, Tangerine, Spurious, Byzantium, Constantinople, Petersburg, Istanbul, Berlin and first London block
-				{1735370, 0, ID{Hash: checksumToBytes(0xedddd61a), Next: 0}},          // Last London block
-				{1735371, 0, ID{Hash: checksumToBytes(0xedddd61a), Next: 0}},          // First MergeNetsplit block
-				{1735372, 1677557087, ID{Hash: checksumToBytes(0xedddd61a), Next: 0}}, // Last MergeNetsplit block
-				{1735372, 1677557088, ID{Hash: checksumToBytes(0xedddd61a), Next: 0}}, // First Shanghai block
+				{0, 0, ID{Hash: checksumToBytes(0x0c56a3fe), Next: 0}},                // Unsynced, last Frontier, Homestead, Tangerine, Spurious, Byzantium, Constantinople, Petersburg, Istanbul, Berlin and first London block
+				{1735370, 0, ID{Hash: checksumToBytes(0x0c56a3fe), Next: 0}},          // Last London block
+				{1735371, 0, ID{Hash: checksumToBytes(0x0c56a3fe), Next: 0}},          // First MergeNetsplit block
+				{1735372, 1677557087, ID{Hash: checksumToBytes(0x0c56a3fe), Next: 0}}, // Last MergeNetsplit block
+				{1735372, 1677557088, ID{Hash: checksumToBytes(0x0c56a3fe), Next: 0}}, // First Shanghai block
 			},
 		},
 	}
