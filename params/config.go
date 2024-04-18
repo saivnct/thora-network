@@ -32,7 +32,7 @@ var (
 	//SepoliaGenesisHash = common.HexToHash("0x25a5cc106eea7138acab33231d7160d69cb777ee0c2c553fcddf5138993e6dd9")
 	//GoerliGenesisHash = common.HexToHash("0xbf7e331f7f7c1dd2e05159666b3bf8bc7a8a3a9eb1d518969eab529dd9b88c1a")
 
-	PlatformMainNetGenesisHash = common.HexToHash("0x0f0105e920b22084cdd8ffa3050f801b037dcc19077cdfb1a7856f5948307e30")
+	PlatformMainNetGenesisHash = common.HexToHash("0xb5b81a3397d8fa323d2ff79a37fe94288427840bc9a7d2b2cb4d558e7a74449c")
 	PlatformTestNetGenesisHash = common.HexToHash("0xbced0bacc7f2710aabcaeee6b150f19f2107705d79aa1f3996b30f30495e989e")
 )
 
